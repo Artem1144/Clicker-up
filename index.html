@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кликер</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>💰 Кликер</h1>
+
+  <div id="counter">
+    <span id="coins">0</span> монет
+  </div>
+
+  <div id="per-second">
+    В секунду: <span id="cps">0</span>
+  </div>
+
+  <button id="click-btn">ТАП</button>
+
+  <div id="shop">
+    <h2>Магазин улучшений</h2>
+
+    <div class="item" data-id="clicker">
+      <div class="info">
+        <div class="name">👆 Кликер</div>
+        <div class="desc">+1 монета за тап</div>
+      </div>
+      <div class="right">
+        <div class="owned">Куплено: <span id="owned-clicker">0</span></div>
+        <button class="buy" data-id="clicker">Купить: <span id="cost-clicker">10</span></button>
+      </div>
+    </div>
+
+    <div class="item" data-id="farm">
+      <div class="info">
+        <div class="name">🌾 Ферма</div>
+        <div class="desc">+1 монета в секунду</div>
+      </div>
+      <div class="right">
+        <div class="owned">Куплено: <span id="owned-farm">0</span></div>
+        <button class="buy" data-id="farm">Купить: <span id="cost-farm">50</span></button>
+      </div>
+    </div>
+
+    <div class="item" data-id="factory">
+      <div class="info">
+        <div class="name">🏭 Фабрика</div>
+        <div class="desc">+10 монет в секунду</div>
+      </div>
+      <div class="right">
+        <div class="owned">Куплено: <span id="owned-factory">0</span></div>
+        <button class="buy" data-id="factory">Купить: <span id="cost-factory">500</span></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
