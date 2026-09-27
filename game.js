@@ -127,7 +127,7 @@ var ITEMS = {
   crown:  { icon: "👑", name: "Венец луны",       desc: "Власть над Кровавой луной", cost: 500, bonus: 1.00 }
 };
 
-// === УЛУЧШЕНИЯ (18) ===
+// === УЛУЧШЕНИЯ ===
 var upgrades = {
   clicker:     { name: "👆 Кликер",           desc: "+1 монета за тап",       cost: 10,                  baseCost: 10,                  count: 0, effect: "click", amount: 1 },
   farm:        { name: "🌾 Ферма",            desc: "+1 монета в секунду",    cost: 50,                  baseCost: 50,                  count: 0, effect: "auto",  amount: 1 },
@@ -149,7 +149,7 @@ var upgrades = {
   omega:       { name: "♎ Омега",             desc: "+10Qa монет в секунду",  cost: 500000000000000000,  baseCost: 500000000000000000,  count: 0, effect: "auto",  amount: 10000000000000000 }
 };
 
-// === ДОСТИЖЕНИЯ (30) ===
+// === ДОСТИЖЕНИЯ ===
 var achievements = [
   { id: "tap_1",      icon: "👆", title: "Первый тап",        desc: "Сделайте 1 тап",              check: function() { return totalTaps >= 1; } },
   { id: "tap_100",    icon: "💪", title: "100 тапов",         desc: "Сделайте 100 тапов",          check: function() { return totalTaps >= 100; } },
@@ -222,7 +222,6 @@ function saveGame() {
   }
   localStorage.setItem(SAVE_KEY, JSON.stringify(data));
 
-  // Глобальный список использованных кодов — НЕ стирается при сбросе
   try {
     localStorage.setItem("clicker-used-promos", JSON.stringify(usedPromos));
   } catch (e) {}
@@ -275,7 +274,6 @@ function loadGame() {
     eventName = data.eventName || "";
     currentEventKey = data.currentEventKey || "";
 
-    // Приоритет — глобальный список кодов (не стирается при сбросе)
     try {
       var globalPromos = localStorage.getItem("clicker-used-promos");
       if (globalPromos) {
@@ -983,7 +981,7 @@ function setupAlarm() {
   resetAlarmTimer();
 }
 
-// === НАГРАДА ЗА 228 КЛИКЕРОВ ===
+// === НАГРАДА ЗА 228 ===
 function checkRewardTab() {
   var tab = document.getElementById("tab-reward");
 
@@ -2019,7 +2017,6 @@ function setupResetButton() {
         eventTimer = 0;
         eventName = "";
         currentEventKey = "";
-        // usedPromos НЕ сбрасываем — коды остаются использованными навсегда
         unlocked = {};
         ownedItems = {};
         secretUnlocked = false;
