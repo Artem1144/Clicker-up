@@ -3,6 +3,7 @@ var coins = 0;
 var coinsPerClick = 1;
 var totalEarned = 0;
 var totalTaps = 0;
+var totalPlayTime = 0;
 var crystals = 0;
 var goldenMultiplier = 1;
 var goldenTimer = 0;
@@ -91,6 +92,31 @@ var ALARM_TIME = 5 * 60 * 1000;
 var rewardClaimed = false;
 var rewardTabShown = false;
 
+// === ЗАПИСКА ===
+var noteShown = false;
+
+// === ЕЖЕДНЕВНЫЕ ЗАДАНИЯ ===
+var quests = [];
+var questsDate = "";
+var questsClaimed = 0;
+
+var QUEST_TYPES = {
+  taps_100:      { icon: "👆", name: "Сделай 100 тапов",           goal: 100,     reward: 2,  rewardType: "💎", stat: "taps" },
+  taps_500:      { icon: "💪", name: "Сделай 500 тапов",           goal: 500,     reward: 5,  rewardType: "💎", stat: "taps" },
+  taps_1000:     { icon: "🔥", name: "Сделай 1000 тапов",          goal: 1000,    reward: 10, rewardType: "💎", stat: "taps" },
+  coins_10k:     { icon: "💰", name: "Заработай 10K монет",        goal: 10000,   reward: 2,  rewardType: "💎", stat: "earn" },
+  coins_100k:    { icon: "🏆", name: "Заработай 100K монет",       goal: 100000,  reward: 5,  rewardType: "💎", stat: "earn" },
+  coins_1m:      { icon: "👑", name: "Заработай 1M монет",         goal: 1000000, reward: 10, rewardType: "💎", stat: "earn" },
+  buy_upgrades_5:{ icon: "🔧", name: "Купи 5 улучшений",           goal: 5,       reward: 3,  rewardType: "💎", stat: "upgrades" },
+  open_chest:    { icon: "🎁", name: "Открой сундук",              goal: 1,       reward: 5,  rewardType: "💎", stat: "chest" },
+  catch_golden:  { icon: "🪙", name: "Поймай золотую монетку",     goal: 1,       reward: 3,  rewardType: "💎", stat: "golden" },
+  buy_skin:      { icon: "🎨", name: "Купи скин",                  goal: 1,       reward: 5,  rewardType: "💎", stat: "skin" },
+  deposit_up:    { icon: "🏦", name: "Улучши вклад",               goal: 1,       reward: 5,  rewardType: "🌑", stat: "deposit" },
+  prestige_item: { icon: "🩸", name: "Купи предмет за осколки",    goal: 1,       reward: 5,  rewardType: "🌑", stat: "item" }
+};
+
+var questProgress = {};
+
 // === НАСТРОЙКИ ===
 var settings = {
   showFloat: true,
@@ -149,7 +175,7 @@ var upgrades = {
   omega:       { name: "♎ Омега",             desc: "+10Qa монет в секунду",  cost: 500000000000000000,  baseCost: 500000000000000000,  count: 0, effect: "auto",  amount: 10000000000000000 }
 };
 
-// === ДОСТИЖЕНИЯ ===
+// === ДОСТИЖЕНИЯ (40) ===
 var achievements = [
   { id: "tap_1",      icon: "👆", title: "Первый тап",        desc: "Сделайте 1 тап",              check: function() { return totalTaps >= 1; } },
   { id: "tap_100",    icon: "💪", title: "100 тапов",         desc: "Сделайте 100 тапов",          check: function() { return totalTaps >= 100; } },
@@ -181,11 +207,42 @@ var achievements = [
   { id: "omega_1",    icon: "♎", title: "Омега",              desc: "Купите Омегу",                check: function() { return upgrades.omega.count >= 1; } },
   { id: "cps_100",    icon: "⚡", title: "Электростанция",    desc: "100 монет в секунду",         check: function() { return getCPS() >= 100; } },
   { id: "cps_10k",    icon: "🌩️", title: "Гроза",             desc: "10K монет в секунду",         check: function() { return getCPS() >= 10000; } },
-  { id: "cps_1m",     icon: "🌪️", title: "Ураган",            desc: "1M монет в секунду",          check: function() { return getCPS() >= 1000000; } }
+  { id: "cps_1m",     icon: "🌪️", title: "Ураган",            desc: "1M монет в секунду",          check: function() { return getCPS() >= 1000000; } },
+  { id: "crystals_50",  icon: "💎", title: "Кристаллы-50",     desc: "Накопите 50 кристаллов",       check: function() { return crystals >= 50; } },
+  { id: "crystals_200", icon: "💠", title: "Кристаллы-200",    desc: "Накопите 200 кристаллов",      check: function() { return crystals >= 200; } },
+  { id: "shards_25",    icon: "🩸", title: "Первая кровь",      desc: "Накопите 25 осколков",         check: function() { return shards >= 25; } },
+  { id: "shards_100",   icon: "💀", title: "Кровопийца",        desc: "Накопите 100 осколков",        check: function() { return shards >= 100; } },
+  { id: "shards_500",   icon: "🌑", title: "Владыка крови",     desc: "Накопите 500 осколков",        check: function() { return shards >= 500; } },
+  { id: "time_10m",     icon: "⏰", title: "10 минут",           desc: "Проведите в игре 10 минут",    check: function() { return totalPlayTime >= 600; } },
+  { id: "time_1h",      icon: "⏱️", title: "1 час",              desc: "Проведите в игре 1 час",       check: function() { return totalPlayTime >= 3600; } },
+  { id: "time_24h",     icon: "📅", title: "Сутки в игре",      desc: "Проведите в игре 24 часа",     check: function() { return totalPlayTime >= 86400; } },
+  { id: "coins_1qa",    icon: "💵", title: "Квадриллионер",     desc: "Накопите 1 Qa монет",          check: function() { return coins >= 1000000000000000; } },
+  { id: "coins_1qi",    icon: "🌈", title: "Квинтиллионер",     desc: "Накопите 1 Qi монет",          check: function() { return coins >= 1000000000000000000; } }
 ];
 
 // === СОХРАНЕНИЕ ===
 var SAVE_KEY = "clicker-save";
+
+// === FIREBASE (Лидерборд) ===
+var firebaseConfig = {
+  databaseURL: "https://clickerup-80939-default-rtdb.firebaseio.com/"
+};
+
+var db = null;
+
+function initFirebase() {
+  try {
+    if (typeof firebase === "undefined") {
+      console.warn("Firebase SDK не загружен");
+      return;
+    }
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+    console.log("Firebase подключён");
+  } catch (e) {
+    console.warn("Firebase не подключён:", e);
+  }
+}
 
 function saveGame() {
   if (window.__resetting) return;
@@ -195,6 +252,7 @@ function saveGame() {
     coinsPerClick: coinsPerClick,
     totalEarned: totalEarned,
     totalTaps: totalTaps,
+    totalPlayTime: totalPlayTime,
     crystals: crystals,
     unlocked: unlocked,
     lastTime: Date.now(),
@@ -215,6 +273,11 @@ function saveGame() {
     gulauTimer: gulauTimer,
     rewardClaimed: rewardClaimed,
     bossRewardClaimed: bossRewardClaimed,
+    noteShown: noteShown,
+    quests: quests,
+    questsDate: questsDate,
+    questsClaimed: questsClaimed,
+    questProgress: questProgress,
     upgrades: {}
   };
   for (var id in upgrades) {
@@ -237,6 +300,7 @@ function loadGame() {
     coinsPerClick = data.coinsPerClick || 1;
     totalEarned = data.totalEarned || 0;
     totalTaps = data.totalTaps || 0;
+    totalPlayTime = data.totalPlayTime || 0;
     crystals = data.crystals || 0;
 
     if (data.unlocked) {
@@ -265,6 +329,14 @@ function loadGame() {
           document.getElementById("offline-popup").classList.add("hidden");
           saveGame();
         };
+      }
+
+      // Оффлайн-голод смайлика: если он на 1-5 уровне, ест монеты
+      if (data.depositUnlocked && data.depositLevel >= 1 && data.depositLevel <= 5) {
+        var hungerPenalty = Math.floor(DEPOSIT_HUNGRY_RATE * capped);
+        if (hungerPenalty > 0) {
+          coins = Math.max(0, coins - hungerPenalty);
+        }
       }
     }
 
@@ -300,6 +372,12 @@ function loadGame() {
 
     rewardClaimed = data.rewardClaimed || false;
     bossRewardClaimed = data.bossRewardClaimed || false;
+    noteShown = data.noteShown || false;
+
+    quests = data.quests || [];
+    questsDate = data.questsDate || "";
+    questsClaimed = data.questsClaimed || 0;
+    questProgress = data.questProgress || {};
 
     if (gulauActive && gulauTimer > 0) {
       document.getElementById("gulau-info").style.display = "block";
@@ -314,6 +392,7 @@ function loadGame() {
 
     checkDailyBonus();
     checkRewardTab();
+    checkNoteTab();
     updateDepositSideButton();
   } catch (e) {
     console.warn("Ошибка загрузки:", e);
@@ -354,7 +433,7 @@ var sounds = {};
 var bgMusic = null;
 
 function initSounds() {
-  var names = ["click", "ui", "achievement"];
+  var names = ["click", "ui", "achievement", "chest", "boss", "eat"];
   names.forEach(function(n) {
     try {
       sounds[n] = new Audio("sounds/" + n + ".mp3");
@@ -551,6 +630,7 @@ function renderSkins() {
       skin.owned = true;
       activeSkin = id;
       playSound("ui");
+      addQuestProgress("skin", 1);
       saveSkins();
       applySkin();
       renderSkins();
@@ -615,6 +695,7 @@ function renderItems() {
       ownedItems[id] = true;
 
       playSound("ui");
+      addQuestProgress("item", 1);
       renderItems();
       updateUI();
       saveGame();
@@ -673,7 +754,7 @@ function renderDeposit() {
         depositUnlocked = true;
         depositLevel = 1;
         lastDepositDropTime = Date.now();
-        playSound("ui");
+        playSound("eat");
         renderDeposit();
         updateDepositSideButton();
         updateUI();
@@ -717,7 +798,8 @@ function renderDeposit() {
       coins -= need;
       depositLevel++;
       lastDepositDropTime = Date.now();
-      playSound("ui");
+      playSound("eat");
+      addQuestProgress("deposit", 1);
       renderDeposit();
       updateDepositSideButton();
       updateUI();
@@ -738,8 +820,6 @@ function updateDepositHunger() {
     if (hi) hi.style.display = "none";
     return;
   }
-
-  if (document.hidden) return;
 
   if (depositLevel <= 5) {
     var hi2 = document.getElementById("hungry-info");
@@ -918,6 +998,8 @@ function openBossModal() {
   updateBossUI();
 
   modal.classList.remove("hidden");
+
+  playSound("boss");
 }
 
 // === ЗНАК ТРЕВОГИ ===
@@ -1011,6 +1093,33 @@ function checkRewardTab() {
   }
 }
 
+// === ЗАПИСКА ===
+function checkNoteTab() {
+  var tab = document.getElementById("tab-note");
+  if (!tab) return;
+
+  if (noteShown) {
+    tab.classList.remove("hidden");
+    return;
+  }
+
+  if (coins >= 1000000000000000000) {
+    noteShown = true;
+    tab.classList.remove("hidden");
+
+    var popup = document.createElement("div");
+    popup.className = "achievement-popup";
+    popup.textContent = "📜 Странная записка появилась в игре...";
+    popup.style.background = "linear-gradient(135deg, #d4c5a0, #8b7355)";
+    popup.style.color = "#1a1a2e";
+    document.body.appendChild(popup);
+    setTimeout(function() { popup.remove(); }, 5000);
+
+    playSound("achievement");
+    saveGame();
+  }
+}
+
 function claimReward() {
   if (rewardClaimed) return;
 
@@ -1040,6 +1149,315 @@ function claimReward() {
     var modal = document.getElementById("modal-reward");
     if (modal) modal.classList.add("hidden");
   }, 2000);
+}
+
+// === ЕЖЕДНЕВНЫЕ ЗАДАНИЯ: ЛОГИКА ===
+function getTodayKey() {
+  var d = new Date();
+  if (d.getHours() < 6) {
+    d.setDate(d.getDate() - 1);
+  }
+  return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+}
+
+function generateQuests() {
+  var availableKeys = [];
+
+  for (var key in QUEST_TYPES) {
+    if (key === "buy_skin") {
+      var hasUnownedSkin = false;
+      for (var sid in skins) {
+        if (!skins[sid].owned) {
+          hasUnownedSkin = true;
+          break;
+        }
+      }
+      if (!hasUnownedSkin) continue;
+    }
+
+    if (key === "deposit_up") {
+      if (depositLevel >= 25) continue;
+    }
+
+    if (key === "prestige_item") {
+      var hasUnownedItem = false;
+      for (var iid in ITEMS) {
+        if (!ownedItems[iid]) {
+          hasUnownedItem = true;
+          break;
+        }
+      }
+      if (!hasUnownedItem) continue;
+    }
+
+    availableKeys.push(key);
+  }
+
+  var chosen = [];
+  while (chosen.length < 3 && availableKeys.length > 0) {
+    var idx = Math.floor(Math.random() * availableKeys.length);
+    chosen.push(availableKeys[idx]);
+    availableKeys.splice(idx, 1);
+  }
+
+  quests = chosen;
+  questsDate = getTodayKey();
+  questsClaimed = 0;
+  questProgress = {};
+
+  quests.forEach(function(id) {
+    questProgress[id] = 0;
+  });
+
+  saveGame();
+}
+
+function checkQuestsUpdate() {
+  var today = getTodayKey();
+  if (questsDate !== today) {
+    generateQuests();
+  }
+}
+
+function addQuestProgress(statName, amount) {
+  if (!quests || quests.length === 0) return;
+
+  quests.forEach(function(id) {
+    var type = QUEST_TYPES[id];
+    if (!type) return;
+    if (type.stat !== statName) return;
+
+    var claimedKey = "clicker-quest-claimed-" + questsDate + "-" + id;
+    try {
+      if (localStorage.getItem(claimedKey) === "1") return;
+    } catch (e) {}
+
+    questProgress[id] = (questProgress[id] || 0) + amount;
+  });
+}
+
+function isQuestClaimed(id) {
+  var claimedKey = "clicker-quest-claimed-" + questsDate + "-" + id;
+  try {
+    return localStorage.getItem(claimedKey) === "1";
+  } catch (e) {
+    return false;
+  }
+}
+
+function claimQuest(id) {
+  var type = QUEST_TYPES[id];
+  if (!type) return;
+  if (isQuestClaimed(id)) return;
+
+  var progress = questProgress[id] || 0;
+  if (progress < type.goal) return;
+
+  var claimedKey = "clicker-quest-claimed-" + questsDate + "-" + id;
+  try {
+    localStorage.setItem(claimedKey, "1");
+  } catch (e) {}
+
+  if (type.rewardType === "💎") {
+    crystals += type.reward;
+  } else if (type.rewardType === "🌑") {
+    shards += type.reward;
+  } else if (type.rewardType === "💰") {
+    coins += type.reward;
+    totalEarned += type.reward;
+  }
+
+  playSound("achievement");
+  renderQuests();
+  updateUI();
+  saveGame();
+}
+
+function renderQuests() {
+  var list = document.getElementById("quests-list");
+  var timerEl = document.getElementById("quests-timer");
+  if (!list) return;
+
+  checkQuestsUpdate();
+
+  if (timerEl) {
+    var now = new Date();
+    var reset = new Date();
+    reset.setHours(6, 0, 0, 0);
+    if (now.getHours() >= 6) {
+      reset.setDate(reset.getDate() + 1);
+    }
+    var diffMs = reset - now;
+    var hours = Math.floor(diffMs / (1000 * 60 * 60));
+    var mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    timerEl.textContent = "⏰ Сброс через " + hours + " ч " + mins + " мин";
+  }
+
+  list.innerHTML = "";
+
+  if (!quests || quests.length === 0) {
+    generateQuests();
+  }
+
+  quests.forEach(function(id) {
+    var type = QUEST_TYPES[id];
+    if (!type) return;
+
+    var progress = questProgress[id] || 0;
+    var isClaimed = isQuestClaimed(id);
+    var isDone = progress >= type.goal;
+
+    var classes = "quest-card";
+    if (isClaimed) classes += " claimed";
+    else if (isDone) classes += " done";
+
+    var div = document.createElement("div");
+    div.className = classes;
+
+    var percent = Math.min(100, (progress / type.goal) * 100);
+    var rewardText = "Награда: " + type.reward + " " + type.rewardType;
+
+    var buttonHtml = "";
+    if (isClaimed) {
+      buttonHtml = '<div class="quest-claimed-label">✅ Получено</div>';
+    } else if (isDone) {
+      buttonHtml = '<button class="quest-claim-btn" data-id="' + id + '">🎁 Забрать награду</button>';
+    } else {
+      buttonHtml = '<button class="quest-claim-btn" disabled>Ещё не выполнено</button>';
+    }
+
+    div.innerHTML =
+      '<div class="quest-header">' +
+      '<div class="quest-icon">' + type.icon + '</div>' +
+      '<div class="quest-name">' + type.name + '</div>' +
+      '<div class="quest-progress-text">' + formatNumber(progress) + " / " + formatNumber(type.goal) + '</div>' +
+      '</div>' +
+      '<div class="quest-progress-bar">' +
+      '<div class="quest-progress-fill" style="width:' + percent + '%"></div>' +
+      '</div>' +
+      '<div class="quest-reward">' + rewardText + '</div>' +
+      buttonHtml;
+
+    list.appendChild(div);
+  });
+
+  document.querySelectorAll(".quest-claim-btn").forEach(function(btn) {
+    btn.onclick = function() {
+      var id = btn.dataset.id;
+      if (id) claimQuest(id);
+    };
+  });
+}
+
+// === ЛИДЕРБОРД ===
+function submitLeaderboardScore() {
+  var nameInput = document.getElementById("leader-name");
+  var submitBtn = document.getElementById("leader-submit");
+  if (!nameInput || !submitBtn) return;
+
+  if (!db) {
+    alert("❌ Лидерборд не подключён. Проверь подключение Firebase.");
+    return;
+  }
+
+  var name = nameInput.value.trim();
+
+  if (!name || name.length < 2) {
+    alert("Ник должен быть хотя бы 2 символа!");
+    return;
+  }
+
+  if (name.length > 15) {
+    alert("Ник не длиннее 15 символов!");
+    return;
+  }
+
+  if (!/^[a-zA-Zа-яА-Я0-9_ ]+$/.test(name)) {
+    alert("Ник может содержать только буквы, цифры, пробел и _");
+    return;
+  }
+
+  var score = Math.floor(totalEarned);
+  var safeName = name.replace(/ /g, "_");
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Отправка...";
+
+  db.ref("leaderboard/" + safeName).set({
+    name: name,
+    score: score,
+    timestamp: Date.now()
+  }).then(function() {
+    alert("✅ Рекорд отправлен!\n\nНик: " + name + "\nОчки: " + formatNumber(score));
+    nameInput.value = "";
+    submitBtn.disabled = false;
+    submitBtn.textContent = "📤 Отправить рекорд";
+    loadLeaderboard();
+  }).catch(function(err) {
+    alert("❌ Ошибка: " + err.message);
+    submitBtn.disabled = false;
+    submitBtn.textContent = "📤 Отправить рекорд";
+  });
+}
+
+function loadLeaderboard() {
+  var list = document.getElementById("leaders-list");
+  if (!list) return;
+
+  if (!db) {
+    list.innerHTML = '<p style="text-align:center;color:#ff5252;padding:20px;">Лидерборд не подключён</p>';
+    return;
+  }
+
+  list.innerHTML = '<p class="leaders-loading">Загрузка...</p>';
+
+  db.ref("leaderboard").orderByChild("score").limitToLast(25).once("value")
+    .then(function(snapshot) {
+      var entries = [];
+
+      snapshot.forEach(function(childSnapshot) {
+        var data = childSnapshot.val();
+        entries.push({
+          name: data.name || "Аноним",
+          score: data.score || 0
+        });
+      });
+
+      if (entries.length === 0) {
+        list.innerHTML = '<p style="text-align:center;color:#aaa;padding:20px;">Пока нет рекордов. Будь первым! 🏆</p>';
+        return;
+      }
+
+      entries.sort(function(a, b) {
+        return b.score - a.score;
+      });
+
+      var html = "";
+      var medals = ["🥇", "🥈", "🥉"];
+
+      entries.slice(0, 25).forEach(function(entry, index) {
+        var rank = index + 1;
+        var rankClass = rank <= 3 ? " rank-" + rank : "";
+        var medal = rank <= 3 ? medals[rank - 1] : rank;
+
+        html += '<div class="leader-row' + rankClass + '">' +
+          '<div class="leader-rank">' + medal + '</div>' +
+          '<div class="leader-name">' + escapeHtml(entry.name) + '</div>' +
+          '<div class="leader-score">' + formatNumber(entry.score) + '</div>' +
+          '</div>';
+      });
+
+      list.innerHTML = html;
+    })
+    .catch(function(err) {
+      list.innerHTML = '<p style="text-align:center;color:#ff5252;padding:20px;">Ошибка загрузки: ' + err.message + '</p>';
+    });
+}
+
+function escapeHtml(text) {
+  var div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 // === #GULAU ===
@@ -1332,7 +1750,8 @@ var PROMOS = {
   "GOLD2024": { reward: function() { coins += 100000; totalEarned += 100000; return "💰 +100 000 монет!"; } },
   "SECRET":   { reward: function() { skins.ruby.owned = true; saveSkins(); return "🔴 Открыт скин «Рубиновый»!"; } },
   "ARTEM":    { reward: function() { crystals += 50; shards += 5; return "💎 +50 кристаллов и 🌑 +5 осколков!"; } },
-  "#GULAU":   { reward: function() { startGulau(); return "🔥 #Gulau активирован! ×5 тапов на 15 минут!"; } }
+  "#GULAU":   { reward: function() { startGulau(); return "🔥 #Gulau активирован! ×5 тапов на 15 минут!"; } },
+  "CHEST":    { reward: function() { resetChestCooldown(); return "🎁 Сундук снова доступен! Скорее открывай!"; } }
 };
 
 function activatePromo() {
@@ -1570,6 +1989,15 @@ function formatNumber(n) {
   return n.toExponential(2);
 }
 
+// === ФОРМАТ ВРЕМЕНИ ===
+function formatTime(seconds) {
+  if (seconds < 60) return seconds + " с";
+  if (seconds < 3600) return Math.floor(seconds / 60) + " мин";
+  var h = Math.floor(seconds / 3600);
+  var m = Math.floor((seconds % 3600) / 60);
+  return h + " ч " + m + " мин";
+}
+
 // === РАСЧЁТЫ ===
 function getCPS() {
   var cps = 0;
@@ -1613,6 +2041,7 @@ function spawnGoldenCoin() {
     document.body.appendChild(banner);
     playSound("ui");
     coin.remove();
+    addQuestProgress("golden", 1);
     updateUI();
     saveGame();
   };
@@ -1716,6 +2145,7 @@ function renderShop() {
         up.count++;
         up.cost = Math.floor(up.baseCost * Math.pow(1.15, up.count));
         if (up.effect === "click") coinsPerClick += up.amount;
+        addQuestProgress("upgrades", 1);
         playSound("ui");
         updateUI();
         checkAchievements();
@@ -1769,6 +2199,8 @@ function updateStats() {
   document.getElementById("stat-crystals").textContent = crystals;
   var statShards = document.getElementById("stat-shards");
   if (statShards) statShards.textContent = shards;
+  var statTime = document.getElementById("stat-time");
+  if (statTime) statTime.textContent = formatTime(totalPlayTime);
 
   var achCount = 0;
   for (var id in unlocked) {
@@ -1785,6 +2217,8 @@ document.getElementById("click-btn").onclick = function(e) {
 
   var tapsToAdd = gulauActive ? 5 : 1;
   totalTaps += tapsToAdd;
+
+  addQuestProgress("taps", tapsToAdd);
 
   var rect = e.target.getBoundingClientRect();
   var x = rect.left + rect.width / 2 + (Math.random() * 40 - 20);
@@ -1819,6 +2253,13 @@ if (depositSideBtn) {
 // === СУНДУК ===
 var CHEST_COOLDOWN = 60 * 60 * 1000;
 
+function resetChestCooldown() {
+  try {
+    localStorage.removeItem("lastChest");
+  } catch (e) {}
+  updateChestButton();
+}
+
 function updateChestButton() {
   var btn = document.getElementById("chest-btn");
   if (!btn) return;
@@ -1845,17 +2286,72 @@ if (chestBtn) {
 
     var crystalsReward = 1 + Math.floor(Math.random() * 3);
     var coinsReward = Math.max(500, Math.floor(getCPS() * 300));
-    crystals += crystalsReward;
-    coins += coinsReward;
-    totalEarned += coinsReward;
 
-    localStorage.setItem("lastChest", Date.now().toString());
-    alert("🎁 Вы открыли сундук!\n💎 +" + crystalsReward + " кристаллов\n💰 +" + formatNumber(coinsReward) + " монет");
-    playSound("achievement");
-    updateUI();
-    updateChestButton();
-    saveGame();
+    openChestAnimation(crystalsReward, coinsReward, function() {
+      crystals += crystalsReward;
+      coins += coinsReward;
+      totalEarned += coinsReward;
+
+      localStorage.setItem("lastChest", Date.now().toString());
+
+      addQuestProgress("chest", 1);
+
+      updateUI();
+      updateChestButton();
+      saveGame();
+    });
   };
+}
+
+// === АНИМАЦИЯ СУНДУКА ===
+function openChestAnimation(crystalsReward, coinsReward, onCollect) {
+  var overlay = document.getElementById("chest-overlay");
+  var scene = document.getElementById("chest-scene");
+  var rewards = document.getElementById("chest-rewards");
+  var collectBtn = document.getElementById("chest-collect");
+
+  if (!overlay || !scene || !rewards || !collectBtn) {
+    onCollect();
+    return;
+  }
+
+  overlay.classList.remove("hidden");
+  scene.classList.remove("shaking", "opened");
+  rewards.innerHTML = "";
+  collectBtn.classList.add("hidden");
+  collectBtn.onclick = null;
+
+  playSound("chest");
+
+  setTimeout(function() {
+    scene.classList.add("shaking");
+
+    setTimeout(function() {
+      scene.classList.remove("shaking");
+
+      var flash = document.createElement("div");
+      flash.className = "chest-flash";
+      document.body.appendChild(flash);
+      setTimeout(function() { flash.remove(); }, 400);
+
+      scene.classList.add("opened");
+
+      var rewardHtml = "";
+      rewardHtml += '<div class="chest-reward-item">💎 +' + crystalsReward + ' кристаллов</div>';
+      rewardHtml += '<div class="chest-reward-item delay-1">💰 +' + formatNumber(coinsReward) + ' монет</div>';
+      rewards.innerHTML = rewardHtml;
+
+      setTimeout(function() {
+        collectBtn.classList.remove("hidden");
+        collectBtn.onclick = function() {
+          collectBtn.onclick = null;
+          overlay.classList.add("hidden");
+          onCollect();
+        };
+      }, 1500);
+
+    }, 1500);
+  }, 500);
 }
 
 // === ВКЛАДКИ ===
@@ -1869,6 +2365,8 @@ document.querySelectorAll(".tab-btn").forEach(function(btn) {
       if (tab === "skins") renderSkins();
       if (tab === "achievements") renderAchievements();
       if (tab === "items") renderItems();
+      if (tab === "leaders") loadLeaderboard();
+      if (tab === "quests") renderQuests();
       modal.classList.remove("hidden");
     }
   };
@@ -1960,6 +2458,19 @@ if (importCancel) {
 var rewardClaimBtn = document.getElementById("reward-claim");
 if (rewardClaimBtn) rewardClaimBtn.onclick = claimReward;
 
+// === ЛИДЕРБОРД ===
+var leaderSubmitBtn = document.getElementById("leader-submit");
+if (leaderSubmitBtn) {
+  leaderSubmitBtn.onclick = submitLeaderboardScore;
+}
+
+var leaderNameInput = document.getElementById("leader-name");
+if (leaderNameInput) {
+  leaderNameInput.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") submitLeaderboardScore();
+  });
+}
+
 // === СЕКРЕТНОЕ МЕНЮ ===
 var secretUnlockBtn = document.getElementById("secret-unlock");
 if (secretUnlockBtn) secretUnlockBtn.onclick = tryUnlockSecret;
@@ -2007,6 +2518,7 @@ function setupResetButton() {
         coinsPerClick = 1;
         totalEarned = 0;
         totalTaps = 0;
+        totalPlayTime = 0;
         crystals = 0;
         goldenMultiplier = 1;
         goldenTimer = 0;
@@ -2032,6 +2544,11 @@ function setupResetButton() {
         bossRewardClaimed = false;
         rewardClaimed = false;
         rewardTabShown = false;
+        noteShown = false;
+        quests = [];
+        questsDate = "";
+        questsClaimed = 0;
+        questProgress = {};
         if (bossTimerInterval) {
           clearInterval(bossTimerInterval);
           bossTimerInterval = null;
@@ -2073,14 +2590,104 @@ function setupResetButton() {
   };
 }
 
+// === НАВИГАЦИЯ МЕЖДУ СТРАНИЦАМИ ===
+var currentPage = 1;
+var totalPages = 2;
+
+function showPage(n) {
+  if (n < 1) n = totalPages;
+  if (n > totalPages) n = 1;
+
+  currentPage = n;
+
+  document.querySelectorAll(".page").forEach(function(page, i) {
+    if (i + 1 === n) {
+      page.classList.add("page-active");
+    } else {
+      page.classList.remove("page-active");
+    }
+  });
+
+  document.querySelectorAll(".page-dot").forEach(function(dot) {
+    if (parseInt(dot.dataset.page) === n) {
+      dot.classList.add("active");
+    } else {
+      dot.classList.remove("active");
+    }
+  });
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function nextPage() {
+  showPage(currentPage + 1);
+}
+
+function prevPage() {
+  showPage(currentPage - 1);
+}
+
+var pagePrev = document.getElementById("page-prev");
+var pageNext = document.getElementById("page-next");
+
+if (pagePrev) pagePrev.onclick = prevPage;
+if (pageNext) pageNext.onclick = nextPage;
+
+document.querySelectorAll(".page-dot").forEach(function(dot) {
+  dot.onclick = function() {
+    var n = parseInt(dot.dataset.page);
+    if (n) showPage(n);
+  };
+});
+
+var touchStartX = 0;
+var touchEndX = 0;
+var touchStartY = 0;
+var touchEndY = 0;
+
+document.addEventListener("touchstart", function(e) {
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
+}, { passive: true });
+
+document.addEventListener("touchend", function(e) {
+  touchEndX = e.changedTouches[0].screenX;
+  touchEndY = e.changedTouches[0].screenY;
+
+  var dx = touchEndX - touchStartX;
+  var dy = touchEndY - touchStartY;
+
+  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    if (document.querySelector(".modal:not(.hidden)")) return;
+
+    if (dx < 0) {
+      nextPage();
+    } else {
+      prevPage();
+    }
+  }
+}, { passive: true });
+
+document.addEventListener("keydown", function(e) {
+  if (e.key === "ArrowLeft") prevPage();
+  if (e.key === "ArrowRight") nextPage();
+});
+
 // === ЦИКЛЫ ===
 setInterval(function() {
   var income = getCPS();
   coins += income;
   totalEarned += income;
+  if (income > 0) addQuestProgress("earn", income);
   updateUI();
   checkAchievements();
   checkRewardTab();
+  checkNoteTab();
+}, 1000);
+
+setInterval(function() {
+  totalPlayTime++;
+  checkQuestsUpdate();
 }, 1000);
 
 setInterval(updateEvent, 1000);
@@ -2138,10 +2745,19 @@ setInterval(function() {
 }, 1000);
 
 // === СТАРТ ===
+initFirebase();
 initSounds();
 loadSettings();
 loadSkins();
 loadGame();
+
+// Генерируем задания при старте, если их нет
+if (!quests || quests.length === 0) {
+  generateQuests();
+} else {
+  checkQuestsUpdate();
+}
+
 renderShop();
 applySkin();
 updateEvent();
@@ -2155,6 +2771,7 @@ setupResetButton();
 setupBossSecret();
 setupAlarm();
 checkRewardTab();
+checkNoteTab();
 updateDepositSideButton();
 
 // === PWA: Service Worker ===
@@ -2164,4 +2781,4 @@ if ("serviceWorker" in navigator) {
       console.warn("Service Worker не зарегистрирован:", e);
     });
   });
-    }
+                }
