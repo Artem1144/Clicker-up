@@ -25,6 +25,32 @@ h1 {
   margin-bottom: 5px;
 }
 
+#hungry-info {
+  font-size: 15px;
+  color: #ff5252;
+  font-weight: bold;
+  margin: 10px 0;
+  animation: hungryPulse 1s ease-in-out infinite;
+}
+
+@keyframes hungryPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+#gulau-info {
+  font-size: 15px;
+  color: #ffeb3b;
+  font-weight: bold;
+  margin: 10px 0;
+  animation: gulauPulse 1s ease-in-out infinite;
+}
+
+@keyframes gulauPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 #prestige-info {
   font-size: 15px;
   color: #d0a0ff;
@@ -63,6 +89,18 @@ body.blood-moon #counter {
   color: #ff5252;
 }
 
+/* === РЯД: ТАП ПО ЦЕНТРУ, СМАЙЛИК СВЕРХУ-СЛЕВА === */
+#tap-row {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 60px auto 10px auto;
+  width: 100%;
+  max-width: 260px;
+  min-height: 180px;
+}
+
 #click-btn {
   width: 180px;
   height: 180px;
@@ -76,7 +114,6 @@ body.blood-moon #counter {
   box-shadow: 0 6px 0 #b35c00;
   transition: transform 0.05s;
   user-select: none;
-  margin: 10px auto;
   display: block;
 }
 
@@ -84,28 +121,62 @@ body.blood-moon #counter {
   transform: translateY(4px);
 }
 
-#prestige-btn {
-  display: block;
-  margin: 20px auto 10px;
-  padding: 12px 25px;
-  background: linear-gradient(135deg, #9c27b0, #673ab7);
+#deposit-side-btn {
+  position: absolute;
+  left: -60px;
+  top: -50px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
   border: none;
+  background: radial-gradient(circle at 30% 30%, #64b5f6, #1565c0);
   color: white;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: bold;
+  font-size: 30px;
   cursor: pointer;
+  box-shadow: 0 4px 0 #0d47a1;
+  transition: transform 0.05s;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+  z-index: 5;
 }
 
-#prestige-btn:disabled {
-  background: #444;
-  color: #888;
-  cursor: not-allowed;
+#deposit-side-btn:active {
+  transform: scale(0.92);
+}
+
+#deposit-side-btn.lvl-hungry {
+  background: radial-gradient(circle at 30% 30%, #ef5350, #b71c1c);
+  box-shadow: 0 4px 0 #7f0000;
+}
+
+#deposit-side-btn.lvl-mid {
+  background: radial-gradient(circle at 30% 30%, #ffd54f, #f57c00);
+  box-shadow: 0 4px 0 #b35c00;
+}
+
+#deposit-side-btn.lvl-happy {
+  background: radial-gradient(circle at 30% 30%, #81c784, #2e7d32);
+  box-shadow: 0 4px 0 #1b5e20;
+}
+
+#deposit-side-btn.lvl-max {
+  background: radial-gradient(circle at 30% 30%, #fff59d, #f9a825);
+  box-shadow: 0 4px 0 #f57f17, 0 0 20px rgba(255, 235, 59, 0.7);
+  animation: maxPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes maxPulse {
+  0%, 100% { box-shadow: 0 4px 0 #f57f17, 0 0 20px rgba(255, 235, 59, 0.7); }
+  50% { box-shadow: 0 4px 0 #f57f17, 0 0 35px rgba(255, 235, 59, 1); }
 }
 
 #chest-btn {
   display: block;
-  margin: 10px auto;
+  margin: 20px auto 10px;
   padding: 12px 25px;
   background: linear-gradient(135deg, #ffb300, #f4511e);
   border: none;
@@ -337,18 +408,38 @@ body.blood-moon #counter {
 }
 
 .tab-btn {
-  background: #16213e;
-  border: 1px solid #3a7bd5;
-  color: #4fc3f7;
+  background: linear-gradient(135deg, #f4d35e, #f57c00);
+  border: none;
+  color: #1a1a2e;
   padding: 8px 14px;
   border-radius: 8px;
   font-size: 13px;
+  font-weight: bold;
   cursor: pointer;
+  box-shadow: 0 3px 0 #b35c00;
+  transition: transform 0.05s;
 }
 
 .tab-btn:active {
-  background: #3a7bd5;
-  color: white;
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #b35c00;
+}
+
+.tab-btn.hidden {
+  display: none;
+}
+
+#tab-reward {
+  background: linear-gradient(135deg, #ffd54f, #ff6f00);
+  color: #1a1a2e;
+  border: none;
+  box-shadow: 0 3px 0 #b35c00;
+  animation: rewardShine 2s ease-in-out infinite;
+}
+
+@keyframes rewardShine {
+  0%, 100% { box-shadow: 0 3px 0 #b35c00, 0 0 8px rgba(244, 211, 94, 0.5); }
+  50% { box-shadow: 0 3px 0 #b35c00, 0 0 20px rgba(244, 211, 94, 0.9); }
 }
 
 .modal {
@@ -427,7 +518,7 @@ body.blood-moon #counter {
 .setting-row input[type="checkbox"] {
   width: 20px;
   height: 20px;
-  accent-color: #3a7bd5;
+  accent-color: #f4d35e;
 }
 
 .danger-btn {
@@ -508,19 +599,26 @@ body.blood-moon #counter {
 
 #event-banner {
   position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px 22px;
-  border-radius: 12px;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 0;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 12px;
   color: white;
-  z-index: 400;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   animation: eventIn 0.5s ease-out;
-  max-width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
 }
 
 #event-banner.hidden {
@@ -528,8 +626,8 @@ body.blood-moon #counter {
 }
 
 @keyframes eventIn {
-  from { opacity: 0; transform: translate(-50%, -30px); }
-  to { opacity: 1; transform: translate(-50%, 0); }
+  from { transform: translateY(-30px); }
+  to { transform: translateY(0); }
 }
 
 .blood-banner {
@@ -547,6 +645,7 @@ body.blood-moon #counter {
   z-index: 400;
   animation: bloodIn 0.5s ease-out;
   text-align: center;
+  pointer-events: none;
 }
 
 @keyframes bloodIn {
@@ -582,12 +681,10 @@ body.blood-moon #counter {
   color: white;
   font-size: 14px;
   box-sizing: border-box;
-  text-transform: uppercase;
 }
 
 #promo-input::placeholder {
   color: #666;
-  text-transform: none;
 }
 
 #promo-btn {
@@ -595,17 +692,19 @@ body.blood-moon #counter {
   width: 100%;
   margin-top: 8px;
   padding: 10px;
-  background: #3a7bd5;
+  background: linear-gradient(135deg, #f4d35e, #f57c00);
   border: none;
-  color: white;
+  color: #1a1a2e;
   border-radius: 8px;
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
+  box-shadow: 0 3px 0 #b35c00;
 }
 
 #promo-btn:active {
-  background: #2a5aa5;
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #b35c00;
 }
 
 #promo-result {
@@ -741,4 +840,252 @@ body.blood-moon #counter {
 .secret-btn.secret-off {
   background: linear-gradient(135deg, #444, #666);
   box-shadow: none;
-  }
+}
+
+.secret-btn:disabled {
+  background: #444;
+  color: #888;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.deposit-emoji {
+  font-size: 80px;
+  text-align: center;
+  margin: 15px 0;
+  animation: depositBob 2s ease-in-out infinite;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@keyframes depositBob {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.05) rotate(-3deg); }
+}
+
+.deposit-emoji.hungry {
+  animation: hungryShake 0.5s ease-in-out infinite;
+}
+
+@keyframes hungryShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+.deposit-level {
+  text-align: center;
+  font-size: 16px;
+  color: #f4d35e;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.deposit-desc {
+  text-align: center;
+  color: #ddd;
+  font-size: 14px;
+  margin: 15px 0;
+}
+
+.deposit-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  background: linear-gradient(135deg, #2e7d32, #4caf50);
+  border: none;
+  color: white;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+}
+
+.deposit-btn:disabled {
+  background: #444;
+  color: #888;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.deposit-warning {
+  text-align: center;
+  color: #ff5252;
+  font-weight: bold;
+  font-size: 14px;
+  margin: 10px 0;
+  animation: hungryPulse 1s ease-in-out infinite;
+}
+
+.deposit-happy {
+  text-align: center;
+  color: #4caf50;
+  font-weight: bold;
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+.save-block {
+  margin-top: 10px;
+}
+
+.save-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  background: linear-gradient(135deg, #f4d35e, #f57c00);
+  border: none;
+  color: #1a1a2e;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #b35c00;
+}
+
+.save-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #b35c00;
+}
+
+.save-box {
+  margin-top: 10px;
+  padding: 12px;
+  background: #0e1a30;
+  border: 1px solid #3a7bd5;
+  border-radius: 10px;
+}
+
+.save-box.hidden {
+  display: none;
+}
+
+.save-hint {
+  font-size: 12px;
+  color: #aaa;
+  margin: 0 0 8px;
+  text-align: left;
+}
+
+.save-text {
+  width: 100%;
+  min-height: 90px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #253a5c;
+  background: #16213e;
+  color: #4fc3f7;
+  font-size: 11px;
+  font-family: monospace;
+  box-sizing: border-box;
+  resize: vertical;
+  word-break: break-all;
+}
+
+.save-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.save-small-btn {
+  flex: 1;
+  padding: 10px;
+  background: #253a5c;
+  border: 1px solid #3a7bd5;
+  color: white;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.save-small-btn:active {
+  background: #3a7bd5;
+}
+
+.save-result {
+  font-size: 13px;
+  margin: 8px 0 0;
+  min-height: 18px;
+  text-align: left;
+}
+
+.save-result.success {
+  color: #4caf50;
+}
+
+.save-result.error {
+  color: #ff5252;
+}
+
+#boss-emoji {
+  -webkit-tap-highlight-color: transparent;
+}
+
+#boss-emoji:active {
+  transform: scale(0.9);
+}
+
+#boss-emoji.hurt {
+  animation: bossHurt 0.15s ease-out;
+}
+
+@keyframes bossHurt {
+  0% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(0.85); filter: brightness(3) hue-rotate(-30deg); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+#boss-result.win {
+  color: #4caf50;
+}
+
+#boss-result.lose {
+  color: #ff5252;
+}
+
+#alarm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#alarm-overlay.hidden {
+  display: none;
+}
+
+#alarm-sign {
+  font-size: 140px;
+  animation: alarmPulse 0.6s ease-in-out infinite;
+  user-select: none;
+}
+
+@keyframes alarmPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+#alarm-text {
+  color: #ff5252;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  margin: 20px;
+  line-height: 1.5;
+}
+
+#alarm-counter {
+  color: #f4d35e;
+  font-size: 24px;
+  font-weight: bold;
+}
