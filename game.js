@@ -4,7 +4,6 @@ var coinsPerClick = 1;
 var totalEarned = 0;
 var totalTaps = 0;
 var crystals = 0;
-var prestigeCount = 0;
 var goldenMultiplier = 1;
 var goldenTimer = 0;
 var unlocked = {};
@@ -28,6 +27,69 @@ var ownedItems = {};
 var secretUnlocked = false;
 var secretAutoClicker = false;
 var secretClickerInterval = null;
+var secretAutoClickerTimer = 0;
+
+// === ВКЛАД ===
+var depositUnlocked = false;
+var depositLevel = 0;
+var lastDepositDropTime = Date.now();
+
+var DEPOSIT_LEVELS = [
+  { level: 1,  cost: 1000000000000000,             emoji: "😭" },
+  { level: 2,  cost: 5000000000000000,             emoji: "😢" },
+  { level: 3,  cost: 15000000000000000,            emoji: "😟" },
+  { level: 4,  cost: 50000000000000000,            emoji: "😐" },
+  { level: 5,  cost: 100000000000000000,           emoji: "😕" },
+  { level: 6,  cost: 250000000000000000,           emoji: "🙂" },
+  { level: 7,  cost: 500000000000000000,           emoji: "😊" },
+  { level: 8,  cost: 1000000000000000000,          emoji: "😄" },
+  { level: 9,  cost: 5000000000000000000,          emoji: "😁" },
+  { level: 10, cost: 15000000000000000000,         emoji: "😂" },
+  { level: 11, cost: 50000000000000000000,         emoji: "🤣" },
+  { level: 12, cost: 100000000000000000000,        emoji: "😎" },
+  { level: 13, cost: 500000000000000000000,        emoji: "🥳" },
+  { level: 14, cost: 1000000000000000000000,       emoji: "😍" },
+  { level: 15, cost: 5000000000000000000000,       emoji: "🤩" },
+  { level: 16, cost: 25000000000000000000000,      emoji: "😻" },
+  { level: 17, cost: 100000000000000000000000,     emoji: "🥰" },
+  { level: 18, cost: 500000000000000000000000,     emoji: "😘" },
+  { level: 19, cost: 1000000000000000000000000,    emoji: "😇" },
+  { level: 20, cost: 5000000000000000000000000,    emoji: "🤑" },
+  { level: 21, cost: 25000000000000000000000000,   emoji: "👑" },
+  { level: 22, cost: 100000000000000000000000000,  emoji: "🌟" },
+  { level: 23, cost: 500000000000000000000000000,  emoji: "💫" },
+  { level: 24, cost: 1000000000000000000000000000, emoji: "🌈" },
+  { level: 25, cost: 5000000000000000000000000000, emoji: "✨" }
+];
+
+var DEPOSIT_DROP_INTERVAL = 30 * 60 * 1000;
+var DEPOSIT_HUNGRY_RATE = 5000000;
+
+// === #GULAU ===
+var gulauActive = false;
+var gulauTimer = 0;
+
+// === БОСС-СМАЙЛИК ===
+var bossActive = false;
+var bossHP = 150;
+var bossMaxHP = 150;
+var bossTimeLeft = 45.0;
+var bossTimerInterval = null;
+var bossClickCooldown = 0;
+var bossClickCount = 0;
+var bossClickTimer = null;
+var bossRewardClaimed = false;
+
+// === ЗНАК ТРЕВОГИ ===
+var alarmTimeout = null;
+var alarmActive = false;
+var alarmClicks = 0;
+var alarmSound = null;
+var ALARM_TIME = 5 * 60 * 1000;
+
+// === НАГРАДА ЗА 228 ===
+var rewardClaimed = false;
+var rewardTabShown = false;
 
 // === НАСТРОЙКИ ===
 var settings = {
@@ -87,7 +149,7 @@ var upgrades = {
   omega:       { name: "♎ Омега",             desc: "+10Qa монет в секунду",  cost: 500000000000000000,  baseCost: 500000000000000000,  count: 0, effect: "auto",  amount: 10000000000000000 }
 };
 
-// === ДОСТИЖЕНИЯ (32) ===
+// === ДОСТИЖЕНИЯ (30) ===
 var achievements = [
   { id: "tap_1",      icon: "👆", title: "Первый тап",        desc: "Сделайте 1 тап",              check: function() { return totalTaps >= 1; } },
   { id: "tap_100",    icon: "💪", title: "100 тапов",         desc: "Сделайте 100 тапов",          check: function() { return totalTaps >= 100; } },
@@ -119,8 +181,7 @@ var achievements = [
   { id: "omega_1",    icon: "♎", title: "Омега",              desc: "Купите Омегу",                check: function() { return upgrades.omega.count >= 1; } },
   { id: "cps_100",    icon: "⚡", title: "Электростанция",    desc: "100 монет в секунду",         check: function() { return getCPS() >= 100; } },
   { id: "cps_10k",    icon: "🌩️", title: "Гроза",             desc: "10K монет в секунду",         check: function() { return getCPS() >= 10000; } },
-  { id: "cps_1m",     icon: "🌪️", title: "Ураган",            desc: "1M монет в секунду",          check: function() { return getCPS() >= 1000000; } },
-  { id: "prestige_1", icon: "💜", title: "Перерождение",      desc: "Переродитесь один раз",       check: function() { return prestigeCount >= 1; } }
+  { id: "cps_1m",     icon: "🌪️", title: "Ураган",            desc: "1M монет в секунду",          check: function() { return getCPS() >= 1000000; } }
 ];
 
 // === СОХРАНЕНИЕ ===
@@ -135,7 +196,6 @@ function saveGame() {
     totalEarned: totalEarned,
     totalTaps: totalTaps,
     crystals: crystals,
-    prestigeCount: prestigeCount,
     unlocked: unlocked,
     lastTime: Date.now(),
     shards: shards,
@@ -147,12 +207,25 @@ function saveGame() {
     ownedItems: ownedItems,
     secretUnlocked: secretUnlocked,
     secretAutoClicker: secretAutoClicker,
+    secretAutoClickerTimer: secretAutoClickerTimer,
+    depositUnlocked: depositUnlocked,
+    depositLevel: depositLevel,
+    lastDepositDropTime: lastDepositDropTime,
+    gulauActive: gulauActive,
+    gulauTimer: gulauTimer,
+    rewardClaimed: rewardClaimed,
+    bossRewardClaimed: bossRewardClaimed,
     upgrades: {}
   };
   for (var id in upgrades) {
     data.upgrades[id] = { cost: upgrades[id].cost, count: upgrades[id].count };
   }
   localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+
+  // Глобальный список использованных кодов — НЕ стирается при сбросе
+  try {
+    localStorage.setItem("clicker-used-promos", JSON.stringify(usedPromos));
+  } catch (e) {}
 }
 
 function loadGame() {
@@ -166,7 +239,6 @@ function loadGame() {
     totalEarned = data.totalEarned || 0;
     totalTaps = data.totalTaps || 0;
     crystals = data.crystals || 0;
-    prestigeCount = data.prestigeCount || 0;
 
     if (data.unlocked) {
       for (var u in data.unlocked) unlocked[u] = data.unlocked[u];
@@ -203,19 +275,48 @@ function loadGame() {
     eventName = data.eventName || "";
     currentEventKey = data.currentEventKey || "";
 
-    if (data.usedPromos) usedPromos = data.usedPromos;
+    // Приоритет — глобальный список кодов (не стирается при сбросе)
+    try {
+      var globalPromos = localStorage.getItem("clicker-used-promos");
+      if (globalPromos) {
+        usedPromos = JSON.parse(globalPromos);
+      } else if (data.usedPromos) {
+        usedPromos = data.usedPromos;
+      }
+    } catch (e) {
+      if (data.usedPromos) usedPromos = data.usedPromos;
+    }
+
     if (data.ownedItems) ownedItems = data.ownedItems;
 
     secretUnlocked = data.secretUnlocked || false;
     secretAutoClicker = data.secretAutoClicker || false;
+    secretAutoClickerTimer = data.secretAutoClickerTimer || 0;
 
-    if (secretUnlocked && secretAutoClicker) {
+    depositUnlocked = data.depositUnlocked || false;
+    depositLevel = data.depositLevel || 0;
+    lastDepositDropTime = Date.now();
+
+    gulauActive = data.gulauActive || false;
+    gulauTimer = data.gulauTimer || 0;
+
+    rewardClaimed = data.rewardClaimed || false;
+    bossRewardClaimed = data.bossRewardClaimed || false;
+
+    if (gulauActive && gulauTimer > 0) {
+      document.getElementById("gulau-info").style.display = "block";
+      updateGulauTimer();
+    }
+
+    if (secretUnlocked && secretAutoClicker && secretAutoClickerTimer > 0) {
       setTimeout(function() {
         startSecretAutoClicker();
       }, 500);
     }
 
     checkDailyBonus();
+    checkRewardTab();
+    updateDepositSideButton();
   } catch (e) {
     console.warn("Ошибка загрузки:", e);
   }
@@ -268,6 +369,12 @@ function initSounds() {
     bgMusic.loop = true;
     bgMusic.volume = 0.25;
   } catch (e) {}
+
+  try {
+    alarmSound = new Audio("sounds/alarm.mp3");
+    alarmSound.loop = true;
+    alarmSound.volume = 0.5;
+  } catch (e) {}
 }
 
 function playSound(name) {
@@ -316,6 +423,32 @@ function unlockAudio() {
 
 document.addEventListener("touchstart", unlockAudio, { once: true });
 document.addEventListener("click", unlockAudio, { once: true });
+
+// === МУЗЫКА: СТОП ПРИ СВОРАЧИВАНИИ/ВЫХОДЕ ===
+function handleVisibilityChange() {
+  if (document.hidden) {
+    stopMusic();
+  } else {
+    if (settings.music) {
+      playMusic();
+    }
+  }
+}
+
+function handlePageHide() {
+  stopMusic();
+}
+
+function handleWindowBlur() {
+  stopMusic();
+}
+
+document.addEventListener("visibilitychange", handleVisibilityChange);
+window.addEventListener("pagehide", handlePageHide);
+window.addEventListener("blur", handleWindowBlur);
+window.addEventListener("beforeunload", function() {
+  stopMusic();
+});
 
 // === СКИНЫ ===
 function loadSkins() {
@@ -491,6 +624,534 @@ function renderItems() {
   });
 }
 
+// === ВКЛАД ===
+function getCurrentDepositEmoji() {
+  if (!depositUnlocked || depositLevel < 1) return "❓";
+  var lvl = DEPOSIT_LEVELS[depositLevel - 1];
+  return lvl ? lvl.emoji : "❓";
+}
+
+function updateDepositSideButton() {
+  var btn = document.getElementById("deposit-side-btn");
+  if (!btn) return;
+
+  btn.classList.remove("lvl-hungry", "lvl-mid", "lvl-happy", "lvl-max");
+
+  if (!depositUnlocked) {
+    btn.textContent = "❓";
+    return;
+  }
+
+  btn.textContent = getCurrentDepositEmoji();
+
+  if (depositLevel <= 5) {
+    btn.classList.add("lvl-hungry");
+  } else if (depositLevel <= 15) {
+    btn.classList.add("lvl-mid");
+  } else if (depositLevel < 25) {
+    btn.classList.add("lvl-happy");
+  } else {
+    btn.classList.add("lvl-max");
+  }
+}
+
+function renderDeposit() {
+  var content = document.getElementById("deposit-content");
+  if (!content) return;
+
+  if (!depositUnlocked) {
+    content.innerHTML =
+      '<div class="deposit-emoji">❓</div>' +
+      '<div class="deposit-desc">Купите вклад за <b>1 Qa</b> монет, чтобы открыть смайлика.</div>' +
+      '<div class="deposit-desc" style="color:#aaa;font-size:13px;">Смайлик будет расти с каждым вложением.</div>' +
+      '<button id="deposit-buy-btn" class="deposit-btn" type="button">💰 Купить вклад за 1 Qa</button>';
+
+    var btn = document.getElementById("deposit-buy-btn");
+    if (btn) {
+      btn.disabled = coins < DEPOSIT_LEVELS[0].cost;
+      btn.onclick = function() {
+        if (coins < DEPOSIT_LEVELS[0].cost) return;
+        coins -= DEPOSIT_LEVELS[0].cost;
+        depositUnlocked = true;
+        depositLevel = 1;
+        lastDepositDropTime = Date.now();
+        playSound("ui");
+        renderDeposit();
+        updateDepositSideButton();
+        updateUI();
+        saveGame();
+      };
+    }
+    return;
+  }
+
+  var emoji = getCurrentDepositEmoji();
+  var isHungry = depositLevel <= 5;
+  var isMax = depositLevel >= 25;
+
+  var html = '<div class="deposit-emoji' + (isHungry ? ' hungry' : '') + '" id="deposit-emoji-el">' + emoji + '</div>';
+  html += '<div class="deposit-level">Уровень ' + depositLevel + ' / 25</div>';
+
+  if (isHungry) {
+    html += '<div class="deposit-warning">😭 Голодный! Ест 5M монет в секунду</div>';
+  } else if (isMax) {
+    html += '<div class="deposit-happy">✨ Полный вклад! Смайлик сыт и доволен.</div>';
+  } else {
+    html += '<div class="deposit-happy">Смайлик доволен</div>';
+  }
+
+  if (!isMax) {
+    var nextCost = DEPOSIT_LEVELS[depositLevel].cost;
+    html += '<div class="deposit-desc">Следующий уровень: <b>' + formatNumber(nextCost) + '</b> монет</div>';
+    html += '<button id="deposit-buy-btn" class="deposit-btn" type="button">💰 Вложить ' + formatNumber(nextCost) + '</button>';
+  } else {
+    html += '<div class="deposit-desc" style="color:#4caf50;">Достигнут максимум!</div>';
+  }
+
+  content.innerHTML = html;
+
+  var btn2 = document.getElementById("deposit-buy-btn");
+  if (btn2) {
+    var need = DEPOSIT_LEVELS[depositLevel].cost;
+    btn2.disabled = coins < need;
+    btn2.onclick = function() {
+      if (coins < need) return;
+      coins -= need;
+      depositLevel++;
+      lastDepositDropTime = Date.now();
+      playSound("ui");
+      renderDeposit();
+      updateDepositSideButton();
+      updateUI();
+      saveGame();
+    };
+  }
+
+  var emojiEl = document.getElementById("deposit-emoji-el");
+  if (emojiEl) {
+    emojiEl.style.cursor = "pointer";
+    emojiEl.onclick = bossEmojiClick;
+  }
+}
+
+function updateDepositHunger() {
+  if (!depositUnlocked) {
+    var hi = document.getElementById("hungry-info");
+    if (hi) hi.style.display = "none";
+    return;
+  }
+
+  if (document.hidden) return;
+
+  if (depositLevel <= 5) {
+    var hi2 = document.getElementById("hungry-info");
+    if (hi2) hi2.style.display = "block";
+
+    var eaten = Math.min(coins, DEPOSIT_HUNGRY_RATE);
+    if (eaten > 0) {
+      coins -= eaten;
+    }
+  } else {
+    var hi3 = document.getElementById("hungry-info");
+    if (hi3) hi3.style.display = "none";
+  }
+}
+
+function checkDepositDrop() {
+  if (!depositUnlocked) return;
+  if (document.hidden) return;
+
+  var now = Date.now();
+  if (now - lastDepositDropTime < DEPOSIT_DROP_INTERVAL) return;
+
+  lastDepositDropTime = now;
+
+  var drop = Math.random() < 0.5 ? 1 : 3;
+  depositLevel = Math.max(1, depositLevel - drop);
+
+  var modal = document.getElementById("modal-deposit");
+  if (modal && !modal.classList.contains("hidden")) {
+    renderDeposit();
+  }
+  updateDepositSideButton();
+
+  saveGame();
+}
+
+// === БОСС-СМАЙЛИК ===
+function setupBossSecret() {
+  var emoji = document.getElementById("boss-emoji");
+  if (emoji) {
+    emoji.onclick = function() {
+      if (!bossActive) return;
+      if (bossClickCooldown > 0) return;
+      bossClickCooldown = 0.05;
+      bossHP--;
+      if (bossHP < 0) bossHP = 0;
+      updateBossUI();
+      emoji.classList.remove("hurt");
+      void emoji.offsetWidth;
+      emoji.classList.add("hurt");
+      if (bossHP <= 0) {
+        winBoss();
+      }
+    };
+  }
+
+  var startBtn = document.getElementById("boss-start");
+  if (startBtn) {
+    startBtn.onclick = function() {
+      startBoss();
+    };
+  }
+}
+
+function startBoss() {
+  bossActive = true;
+  bossHP = bossMaxHP;
+  bossTimeLeft = 45.0;
+  document.getElementById("boss-result").textContent = "";
+  document.getElementById("boss-result").className = "";
+  document.getElementById("boss-start").style.display = "none";
+  updateBossUI();
+
+  if (bossTimerInterval) clearInterval(bossTimerInterval);
+  bossTimerInterval = setInterval(function() {
+    if (!bossActive) return;
+    bossTimeLeft -= 0.05;
+    bossClickCooldown -= 0.05;
+    if (bossClickCooldown < 0) bossClickCooldown = 0;
+    if (bossTimeLeft <= 0) {
+      bossTimeLeft = 0;
+      loseBoss();
+    }
+    updateBossUI();
+  }, 50);
+}
+
+function updateBossUI() {
+  var fill = document.getElementById("boss-hp-fill");
+  var text = document.getElementById("boss-hp-text");
+  var timer = document.getElementById("boss-timer");
+  if (fill) fill.style.width = (bossHP / bossMaxHP * 100) + "%";
+  if (text) text.textContent = bossHP + " / " + bossMaxHP;
+  if (timer) timer.textContent = "⏱ " + bossTimeLeft.toFixed(1) + " с";
+}
+
+function winBoss() {
+  bossActive = false;
+  if (bossTimerInterval) {
+    clearInterval(bossTimerInterval);
+    bossTimerInterval = null;
+  }
+
+  var res = document.getElementById("boss-result");
+  if (!bossRewardClaimed) {
+    bossRewardClaimed = true;
+    shards += 25;
+    if (res) {
+      res.textContent = "🏆 Победа! +25 🌑 кровавых осколков!";
+      res.className = "win";
+    }
+  } else {
+    if (res) {
+      res.textContent = "🏆 Победа! (награда уже получена ранее)";
+      res.className = "win";
+    }
+  }
+
+  document.getElementById("boss-start").style.display = "block";
+  document.getElementById("boss-start").textContent = "🔁 Ещё раз";
+  playSound("achievement");
+  updateUI();
+  saveGame();
+}
+
+function loseBoss() {
+  bossActive = false;
+  if (bossTimerInterval) {
+    clearInterval(bossTimerInterval);
+    bossTimerInterval = null;
+  }
+
+  var penalty = 10000000000000000000;
+  var lost = Math.min(coins, penalty);
+  coins -= lost;
+
+  var res = document.getElementById("boss-result");
+  if (res) {
+    res.textContent = "💀 Провал! −" + formatNumber(lost) + " монет.";
+    res.className = "lose";
+  }
+  document.getElementById("boss-start").style.display = "block";
+  document.getElementById("boss-start").textContent = "🔁 Попробовать снова";
+  playSound("ui");
+  updateUI();
+  saveGame();
+}
+
+function bossEmojiClick() {
+  bossClickCount++;
+  if (bossClickTimer) clearTimeout(bossClickTimer);
+  bossClickTimer = setTimeout(function() {
+    bossClickCount = 0;
+  }, 1500);
+
+  if (bossClickCount >= 3) {
+    bossClickCount = 0;
+    openBossModal();
+  }
+}
+
+function openBossModal() {
+  var modal = document.getElementById("modal-boss");
+  if (!modal) return;
+
+  var depositModal = document.getElementById("modal-deposit");
+  if (depositModal) depositModal.classList.add("hidden");
+
+  bossActive = false;
+  bossHP = bossMaxHP;
+  bossTimeLeft = 45.0;
+  document.getElementById("boss-result").textContent = "";
+  document.getElementById("boss-result").className = "";
+  document.getElementById("boss-start").style.display = "block";
+  document.getElementById("boss-start").textContent = "🔥 Начать бой";
+  updateBossUI();
+
+  modal.classList.remove("hidden");
+}
+
+// === ЗНАК ТРЕВОГИ ===
+function resetAlarmTimer() {
+  if (alarmTimeout) clearTimeout(alarmTimeout);
+  alarmTimeout = setTimeout(triggerAlarm, ALARM_TIME);
+}
+
+function triggerAlarm() {
+  if (alarmActive) return;
+  alarmActive = true;
+  alarmClicks = 0;
+  updateAlarmCounter();
+
+  var overlay = document.getElementById("alarm-overlay");
+  if (overlay) overlay.classList.remove("hidden");
+
+  if (alarmSound && settings.sound) {
+    try {
+      alarmSound.currentTime = 0;
+      alarmSound.play().catch(function() {});
+    } catch (e) {}
+  }
+}
+
+function stopAlarm() {
+  alarmActive = false;
+  var overlay = document.getElementById("alarm-overlay");
+  if (overlay) overlay.classList.add("hidden");
+
+  if (alarmSound) {
+    try {
+      alarmSound.pause();
+      alarmSound.currentTime = 0;
+    } catch (e) {}
+  }
+
+  resetAlarmTimer();
+}
+
+function updateAlarmCounter() {
+  var c = document.getElementById("alarm-counter");
+  if (c) c.textContent = alarmClicks + " / 5";
+}
+
+function setupAlarm() {
+  var overlay = document.getElementById("alarm-overlay");
+  if (!overlay) return;
+
+  overlay.onclick = function() {
+    if (!alarmActive) return;
+    alarmClicks++;
+    updateAlarmCounter();
+    playSound("ui");
+
+    if (alarmClicks >= 5) {
+      stopAlarm();
+    }
+  };
+
+  resetAlarmTimer();
+}
+
+// === НАГРАДА ЗА 228 КЛИКЕРОВ ===
+function checkRewardTab() {
+  var tab = document.getElementById("tab-reward");
+
+  if (!tab) return;
+
+  if (rewardClaimed) {
+    tab.classList.add("hidden");
+    return;
+  }
+
+  if (upgrades.clicker.count >= 228) {
+    if (!rewardTabShown) {
+      tab.classList.remove("hidden");
+      rewardTabShown = true;
+
+      var popup = document.createElement("div");
+      popup.className = "achievement-popup";
+      popup.textContent = "🏅 Ты прокачал Кликер до 228! Открой вкладку «Награда»!";
+      document.body.appendChild(popup);
+      setTimeout(function() { popup.remove(); }, 5000);
+
+      playSound("achievement");
+    }
+  } else {
+    tab.classList.add("hidden");
+    rewardTabShown = false;
+  }
+}
+
+function claimReward() {
+  if (rewardClaimed) return;
+
+  shards += 25;
+  rewardClaimed = true;
+
+  var res = document.getElementById("reward-result");
+  if (res) {
+    res.textContent = "🎉 Ты получил +25 🌑 кровавых осколков!";
+    res.style.color = "#4caf50";
+  }
+
+  var btn = document.getElementById("reward-claim");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "✅ Получено";
+  }
+
+  playSound("achievement");
+  updateUI();
+  saveGame();
+
+  setTimeout(function() {
+    var tab = document.getElementById("tab-reward");
+    if (tab) tab.classList.add("hidden");
+
+    var modal = document.getElementById("modal-reward");
+    if (modal) modal.classList.add("hidden");
+  }, 2000);
+}
+
+// === #GULAU ===
+function startGulau() {
+  gulauActive = true;
+  gulauTimer = 15 * 60;
+  document.getElementById("gulau-info").style.display = "block";
+  updateGulauTimer();
+}
+
+function updateGulauTimer() {
+  var el = document.getElementById("gulau-timer");
+  if (el && gulauActive) {
+    var m = Math.floor(gulauTimer / 60);
+    var s = gulauTimer % 60;
+    el.textContent = m + ":" + (s < 10 ? "0" : "") + s;
+  }
+}
+
+function endGulau() {
+  gulauActive = false;
+  gulauTimer = 0;
+  document.getElementById("gulau-info").style.display = "none";
+}
+
+// === ЭКСПОРТ / ИМПОРТ ===
+function exportSave() {
+  try {
+    var raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) {
+      alert("Нет сохранения для экспорта.");
+      return;
+    }
+
+    var data = JSON.parse(raw);
+    data.exportDate = Date.now();
+
+    var json = JSON.stringify(data);
+    var encoded = btoa(unescape(encodeURIComponent(json)));
+
+    var box = document.getElementById("export-box");
+    var text = document.getElementById("export-text");
+    if (box && text) {
+      text.value = encoded;
+      box.classList.remove("hidden");
+    }
+  } catch (e) {
+    alert("Ошибка экспорта: " + e.message);
+  }
+}
+
+function copyExport() {
+  var text = document.getElementById("export-text");
+  if (!text) return;
+  text.select();
+  text.setSelectionRange(0, 999999);
+
+  try {
+    document.execCommand("copy");
+    alert("✅ Скопировано!");
+  } catch (e) {
+    try {
+      navigator.clipboard.writeText(text.value);
+      alert("✅ Скопировано!");
+    } catch (err) {
+      alert("Не удалось скопировать. Выделите текст и скопируйте вручную.");
+    }
+  }
+}
+
+function importSave() {
+  var text = document.getElementById("import-text");
+  var result = document.getElementById("import-result");
+  if (!text || !result) return;
+
+  var code = text.value.trim();
+  result.className = "";
+
+  if (!code) {
+    result.textContent = "Вставьте код сохранения.";
+    result.classList.add("error");
+    return;
+  }
+
+  try {
+    var json = decodeURIComponent(escape(atob(code)));
+    var data = JSON.parse(json);
+
+    if (!data || typeof data.coins === "undefined") {
+      throw new Error("Неверный формат");
+    }
+
+    if (!confirm("⚠️ Текущий прогресс будет заменён.\nПродолжить?")) {
+      return;
+    }
+
+    window.__resetting = true;
+    localStorage.setItem(SAVE_KEY, json);
+    result.textContent = "✅ Прогресс загружен! Перезагрузка...";
+    result.classList.add("success");
+
+    setTimeout(function() {
+      location.reload();
+    }, 800);
+  } catch (e) {
+    result.textContent = "❌ Ошибка: " + e.message;
+    result.classList.add("error");
+  }
+}
+
 // === ЕЖЕДНЕВНЫЙ БОНУС ===
 function checkDailyBonus() {
   if (!settings.showDaily) return;
@@ -546,7 +1207,7 @@ function startRandomEvent() {
 
   var banner = document.getElementById("event-banner");
   if (banner) {
-    banner.textContent = ev.name + "! x" + ev.mult + " доход на " + Math.floor(ev.duration / 60) + " мин!";
+    banner.textContent = ev.name + " x" + ev.mult;
     banner.style.background = "linear-gradient(135deg, " + ev.color + ", #000)";
     banner.classList.remove("hidden");
   }
@@ -593,7 +1254,7 @@ function updateEvent() {
       if (ev) {
         var m = Math.floor(eventTimer / 60);
         var s = eventTimer % 60;
-        banner.textContent = ev.name + "! x" + ev.mult + " — ещё " + m + ":" + (s < 10 ? "0" : "") + s;
+        banner.textContent = ev.name + " x" + ev.mult + " — " + m + ":" + (s < 10 ? "0" : "") + s;
       }
     }
   }
@@ -672,7 +1333,8 @@ var PROMOS = {
   "CRYSTAL":  { reward: function() { crystals += 20; return "💎 +20 кристаллов!"; } },
   "GOLD2024": { reward: function() { coins += 100000; totalEarned += 100000; return "💰 +100 000 монет!"; } },
   "SECRET":   { reward: function() { skins.ruby.owned = true; saveSkins(); return "🔴 Открыт скин «Рубиновый»!"; } },
-  "ARTEM":    { reward: function() { crystals += 50; shards += 5; return "💎 +50 кристаллов и 🌑 +5 осколков!"; } }
+  "ARTEM":    { reward: function() { crystals += 50; shards += 5; return "💎 +50 кристаллов и 🌑 +5 осколков!"; } },
+  "#GULAU":   { reward: function() { startGulau(); return "🔥 #Gulau активирован! ×5 тапов на 15 минут!"; } }
 };
 
 function activatePromo() {
@@ -749,8 +1411,9 @@ function setupLogoSecret() {
   };
 }
 
-// === СЕКРЕТНОЕ МЕНЮ: КЛИКЕР 67 ===
+// === СЕКРЕТНОЕ МЕНЮ ===
 var SECRET_TAPS_NEEDED = 6767;
+var SECRET_ACTIVATION_COST = 67000000000000000000;
 
 function setupAdvancedButton() {
   var btn = document.getElementById("advanced-btn");
@@ -780,34 +1443,38 @@ function openSecretMenu() {
 
 function updateSecretUI() {
   var locked = document.getElementById("secret-locked");
-  var unlocked = document.getElementById("secret-unlocked");
+  var unlockedEl = document.getElementById("secret-unlocked");
   var tapsEl = document.getElementById("secret-taps");
   var progressEl = document.getElementById("secret-progress");
   var toggleBtn = document.getElementById("secret-toggle");
   var statusEl = document.getElementById("secret-status");
 
-  if (!locked || !unlocked) return;
+  if (!locked || !unlockedEl) return;
 
   if (secretUnlocked) {
     locked.style.display = "none";
-    unlocked.style.display = "block";
+    unlockedEl.style.display = "block";
 
     if (secretAutoClicker) {
-      toggleBtn.textContent = "⏸️ Выключить автокликер";
+      toggleBtn.textContent = "🔥 Активировать ещё (67 Qa)";
       toggleBtn.classList.remove("secret-on");
       toggleBtn.classList.add("secret-off");
-      statusEl.textContent = "🔥 Автокликер активен — 67 кликов/сек";
+      toggleBtn.disabled = true;
+      var m = Math.floor(secretAutoClickerTimer / 60);
+      var s = secretAutoClickerTimer % 60;
+      statusEl.textContent = "🔥 Автокликер активен — 67 кликов/сек. Осталось: " + m + ":" + (s < 10 ? "0" : "") + s;
       statusEl.style.color = "#4caf50";
     } else {
-      toggleBtn.textContent = "▶️ Включить автокликер";
+      toggleBtn.textContent = "🔥 Активировать (67 Qa)";
       toggleBtn.classList.remove("secret-off");
       toggleBtn.classList.add("secret-on");
-      statusEl.textContent = "Автокликер выключен";
+      toggleBtn.disabled = coins < SECRET_ACTIVATION_COST;
+      statusEl.textContent = "Разблокирован. Активация: 67 Qa за 30 минут.";
       statusEl.style.color = "#aaa";
     }
   } else {
     locked.style.display = "block";
-    unlocked.style.display = "none";
+    unlockedEl.style.display = "none";
 
     if (tapsEl) tapsEl.textContent = formatNumber(totalTaps);
 
@@ -838,19 +1505,23 @@ function tryUnlockSecret() {
   saveGame();
 }
 
-function toggleSecretAutoClicker() {
+function activateSecretAutoClicker() {
   if (!secretUnlocked) return;
+  if (secretAutoClicker) return;
 
-  secretAutoClicker = !secretAutoClicker;
-
-  if (secretAutoClicker) {
-    startSecretAutoClicker();
-  } else {
-    stopSecretAutoClicker();
+  if (coins < SECRET_ACTIVATION_COST) {
+    alert("❌ Недостаточно монет!\nНужно: 67 Qa\nУ вас: " + formatNumber(coins));
+    return;
   }
 
-  playSound("ui");
+  coins -= SECRET_ACTIVATION_COST;
+  secretAutoClicker = true;
+  secretAutoClickerTimer = 30 * 60;
+
+  startSecretAutoClicker();
+  playSound("achievement");
   updateSecretUI();
+  updateUI();
   saveGame();
 }
 
@@ -862,7 +1533,8 @@ function startSecretAutoClicker() {
     var add = value * 2;
     coins += add;
     totalEarned += add;
-    totalTaps += 2;
+    var tapsToAdd = gulauActive ? 10 : 2;
+    totalTaps += tapsToAdd;
 
     if (bloodMoonActive && Math.random() < 0.02) {
       shards += 1;
@@ -878,6 +1550,8 @@ function stopSecretAutoClicker() {
     clearInterval(secretClickerInterval);
     secretClickerInterval = null;
   }
+  secretAutoClicker = false;
+  secretAutoClickerTimer = 0;
 }
 
 // === ФОРМАТ ЧИСЕЛ ===
@@ -914,34 +1588,6 @@ function getClickValue() {
   var base = coinsPerClick + getCPS() * 0.05;
   var moonBonus = bloodMoonActive ? 2 : 1;
   return base * goldenMultiplier * moonBonus * eventMultiplier * getItemBonus();
-}
-
-function getPrestigeGain() {
-  return Math.floor(Math.sqrt(totalEarned / 1000000000));
-}
-
-// === ПРЕСТИЖ ===
-function doPrestige() {
-  var gain = getPrestigeGain();
-  if (gain <= 0) return;
-  if (!confirm("Переродиться за " + gain + " 💎?\nВесь прогресс сбросится, но вы получите " + gain + " кристаллов для покупки скинов.")) return;
-
-  playSound("ui");
-  crystals += gain;
-  prestigeCount++;
-  coins = 0;
-  coinsPerClick = 1;
-  totalEarned = 0;
-  totalTaps = 0;
-
-  for (var id in upgrades) {
-    upgrades[id].count = 0;
-    upgrades[id].cost = upgrades[id].baseCost;
-  }
-
-  updateUI();
-  checkAchievements();
-  saveGame();
 }
 
 // === ЗОЛОТАЯ МОНЕТКА ===
@@ -1075,6 +1721,7 @@ function renderShop() {
         playSound("ui");
         updateUI();
         checkAchievements();
+        checkRewardTab();
         saveGame();
       }
     };
@@ -1086,9 +1733,6 @@ function updateUI() {
   document.getElementById("coins").textContent = formatNumber(coins);
   document.getElementById("cps").textContent = formatNumber(getCPS()) + (goldenMultiplier > 1 ? " (x7!)" : "");
   document.getElementById("crystals").textContent = crystals;
-  document.getElementById("crystal-bonus").textContent = "для скинов";
-  document.getElementById("prestige-gain").textContent = getPrestigeGain();
-  document.getElementById("prestige-btn").disabled = getPrestigeGain() <= 0;
 
   var shardsEl = document.getElementById("shards");
   if (shardsEl) shardsEl.textContent = shards;
@@ -1110,6 +1754,11 @@ function updateUI() {
   if (secretModal && !secretModal.classList.contains("hidden")) {
     updateSecretUI();
   }
+
+  var depositModal = document.getElementById("modal-deposit");
+  if (depositModal && !depositModal.classList.contains("hidden")) {
+    renderDeposit();
+  }
 }
 
 // === СТАТИСТИКА ===
@@ -1122,7 +1771,6 @@ function updateStats() {
   document.getElementById("stat-crystals").textContent = crystals;
   var statShards = document.getElementById("stat-shards");
   if (statShards) statShards.textContent = shards;
-  document.getElementById("stat-prestige").textContent = prestigeCount;
 
   var achCount = 0;
   for (var id in unlocked) {
@@ -1136,7 +1784,9 @@ document.getElementById("click-btn").onclick = function(e) {
   var value = getClickValue();
   coins += value;
   totalEarned += value;
-  totalTaps++;
+
+  var tapsToAdd = gulauActive ? 5 : 1;
+  totalTaps += tapsToAdd;
 
   var rect = e.target.getBoundingClientRect();
   var x = rect.left + rect.width / 2 + (Math.random() * 40 - 20);
@@ -1151,11 +1801,22 @@ document.getElementById("click-btn").onclick = function(e) {
   playSound("click");
   updateUI();
   checkAchievements();
+
+  resetAlarmTimer();
+
   saveGame();
 };
 
-// === ПРЕСТИЖ ===
-document.getElementById("prestige-btn").onclick = doPrestige;
+// === КНОПКА ВКЛАДА СБОКУ ===
+var depositSideBtn = document.getElementById("deposit-side-btn");
+if (depositSideBtn) {
+  depositSideBtn.onclick = function() {
+    playSound("ui");
+    renderDeposit();
+    document.getElementById("modal-deposit").classList.remove("hidden");
+    updateDepositSideButton();
+  };
+}
 
 // === СУНДУК ===
 var CHEST_COOLDOWN = 60 * 60 * 1000;
@@ -1263,22 +1924,57 @@ if (promoInput) {
   });
 }
 
+// === ЭКСПОРТ/ИМПОРТ ===
+var exportBtn = document.getElementById("export-btn");
+if (exportBtn) exportBtn.onclick = exportSave;
+
+var copyBtn = document.getElementById("copy-btn");
+if (copyBtn) copyBtn.onclick = copyExport;
+
+var exportClose = document.getElementById("export-close");
+if (exportClose) {
+  exportClose.onclick = function() {
+    var box = document.getElementById("export-box");
+    if (box) box.classList.add("hidden");
+  };
+}
+
+var importBtn = document.getElementById("import-btn");
+if (importBtn) {
+  importBtn.onclick = function() {
+    var box = document.getElementById("import-box");
+    if (box) box.classList.toggle("hidden");
+  };
+}
+
+var importLoad = document.getElementById("import-load");
+if (importLoad) importLoad.onclick = importSave;
+
+var importCancel = document.getElementById("import-cancel");
+if (importCancel) {
+  importCancel.onclick = function() {
+    var box = document.getElementById("import-box");
+    if (box) box.classList.add("hidden");
+  };
+}
+
+// === НАГРАДА ===
+var rewardClaimBtn = document.getElementById("reward-claim");
+if (rewardClaimBtn) rewardClaimBtn.onclick = claimReward;
+
 // === СЕКРЕТНОЕ МЕНЮ ===
 var secretUnlockBtn = document.getElementById("secret-unlock");
 if (secretUnlockBtn) secretUnlockBtn.onclick = tryUnlockSecret;
 
 var secretToggleBtn = document.getElementById("secret-toggle");
-if (secretToggleBtn) secretToggleBtn.onclick = toggleSecretAutoClicker;
+if (secretToggleBtn) secretToggleBtn.onclick = activateSecretAutoClicker;
 
 setupAdvancedButton();
 
 // === КНОПКА СБРОСА ===
 function setupResetButton() {
   var btn = document.getElementById("settings-reset");
-  if (!btn) {
-    console.warn("Кнопка settings-reset не найдена");
-    return;
-  }
+  if (!btn) return;
 
   var step = 0;
   var timer = null;
@@ -1314,7 +2010,6 @@ function setupResetButton() {
         totalEarned = 0;
         totalTaps = 0;
         crystals = 0;
-        prestigeCount = 0;
         goldenMultiplier = 1;
         goldenTimer = 0;
         shards = 0;
@@ -1324,11 +2019,26 @@ function setupResetButton() {
         eventTimer = 0;
         eventName = "";
         currentEventKey = "";
-        usedPromos = {};
+        // usedPromos НЕ сбрасываем — коды остаются использованными навсегда
         unlocked = {};
         ownedItems = {};
         secretUnlocked = false;
         secretAutoClicker = false;
+        secretAutoClickerTimer = 0;
+        depositUnlocked = false;
+        depositLevel = 0;
+        gulauActive = false;
+        gulauTimer = 0;
+        bossActive = false;
+        bossHP = 150;
+        bossTimeLeft = 45;
+        bossRewardClaimed = false;
+        rewardClaimed = false;
+        rewardTabShown = false;
+        if (bossTimerInterval) {
+          clearInterval(bossTimerInterval);
+          bossTimerInterval = null;
+        }
         stopSecretAutoClicker();
 
         for (var id in upgrades) {
@@ -1340,8 +2050,6 @@ function setupResetButton() {
           skins[sid].owned = (sid === "gold");
         }
         activeSkin = "gold";
-
-        try { localStorage.clear(); } catch (err) {}
 
         try {
           localStorage.removeItem(SAVE_KEY);
@@ -1375,11 +2083,45 @@ setInterval(function() {
   totalEarned += income;
   updateUI();
   checkAchievements();
+  checkRewardTab();
 }, 1000);
 
 setInterval(updateEvent, 1000);
 setInterval(updateBloodMoon, 1000);
 setInterval(updateChestButton, 1000);
+setInterval(updateDepositHunger, 1000);
+setInterval(checkDepositDrop, 10000);
+setInterval(function() {
+  if (gulauActive) {
+    gulauTimer--;
+    if (gulauTimer <= 0) {
+      endGulau();
+    } else {
+      updateGulauTimer();
+    }
+  }
+}, 1000);
+setInterval(function() {
+  if (secretAutoClicker && secretAutoClickerTimer > 0) {
+    secretAutoClickerTimer--;
+    if (secretAutoClickerTimer <= 0) {
+      secretAutoClickerTimer = 0;
+      stopSecretAutoClicker();
+      var popup = document.createElement("div");
+      popup.className = "achievement-popup";
+      popup.textContent = "⏸️ Кликер 67 остановлен. Можно активировать снова за 67 Qa.";
+      document.body.appendChild(popup);
+      setTimeout(function() { popup.remove(); }, 4000);
+      updateSecretUI();
+      saveGame();
+    } else {
+      var modal = document.getElementById("modal-secret");
+      if (modal && !modal.classList.contains("hidden")) {
+        updateSecretUI();
+      }
+    }
+  }
+}, 1000);
 setInterval(saveGame, 5000);
 window.addEventListener("beforeunload", saveGame);
 
@@ -1413,6 +2155,10 @@ updateChestButton();
 checkAchievements();
 setupLogoSecret();
 setupResetButton();
+setupBossSecret();
+setupAlarm();
+checkRewardTab();
+updateDepositSideButton();
 
 // === PWA: Service Worker ===
 if ("serviceWorker" in navigator) {
@@ -1421,4 +2167,4 @@ if ("serviceWorker" in navigator) {
       console.warn("Service Worker не зарегистрирован:", e);
     });
   });
-   }
+    }
