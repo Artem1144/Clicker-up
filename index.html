@@ -13,58 +13,95 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="topbar">
-    <button class="tab-btn" data-tab="items">🛒 Магазин</button>
-    <button class="tab-btn" data-tab="achievements">🏆 Достижения</button>
-    <button class="tab-btn" data-tab="skins">🎨 Скины</button>
-    <button class="tab-btn" data-tab="stats">📊 Статистика</button>
-    <button class="tab-btn" data-tab="settings">⚙️ Настройки</button>
-    <button class="tab-btn" data-tab="help">❓ Помощь</button>
-    <button class="tab-btn hidden" data-tab="reward" id="tab-reward">🏅 Награда</button>
+
+  <!-- СТРАНИЦА 1: КЛИКЕР -->
+  <div class="page page-active" id="page-1">
+
+    <div id="topbar">
+      <button class="tab-btn" data-tab="items">🛒 Магазин</button>
+      <button class="tab-btn" data-tab="achievements">🏆 Достижения</button>
+      <button class="tab-btn" data-tab="quests">📜 Задания</button>
+      <button class="tab-btn" data-tab="leaders">🥇 Лидеры</button>
+      <button class="tab-btn" data-tab="skins">🎨 Скины</button>
+      <button class="tab-btn" data-tab="stats">📊 Статистика</button>
+      <button class="tab-btn" data-tab="settings">⚙️ Настройки</button>
+      <button class="tab-btn" data-tab="help">❓ Помощь</button>
+      <button class="tab-btn hidden" data-tab="reward" id="tab-reward">🏅 Награда</button>
+      <button class="tab-btn hidden" data-tab="note" id="tab-note">📜 Записка</button>
+    </div>
+
+    <div id="event-banner" class="hidden"></div>
+
+    <h1 id="logo">💰 Clicker up</h1>
+
+    <div id="counter">
+      <span id="coins">0</span> монет
+    </div>
+
+    <div id="per-second">
+      В секунду: <span id="cps">0</span>
+    </div>
+
+    <div id="hungry-info" style="display:none;">
+      😭 Голодный смайлик: −5M монет/сек
+    </div>
+
+    <div id="gulau-info" style="display:none;">
+      🔥 #Gulau: ×5 тапов, осталось <span id="gulau-timer">15:00</span>
+    </div>
+
+    <div id="prestige-info">
+      💎 Кристаллов: <span id="crystals">0</span>
+    </div>
+
+    <div id="blood-info" style="display:none;">
+      🌕 Кровавая луна! До конца: <span id="blood-timer">30:00</span>
+    </div>
+
+    <div id="shards-info">
+      🌑 Кровавых осколков: <span id="shards">0</span> | ⚔️ Бонус: <span id="item-bonus">+0%</span>
+    </div>
+
+    <div id="tap-row">
+      <button id="deposit-side-btn" title="Вклад">❓</button>
+      <button id="click-btn">ТАП</button>
+    </div>
+
+    <button id="chest-btn">🎁 Открыть сундук</button>
+
+    <div id="shop">
+      <h2>Магазин улучшений</h2>
+      <div id="shop-list"></div>
+    </div>
+
   </div>
 
-  <div id="event-banner" class="hidden"></div>
-
-  <h1 id="logo">💰 Clicker up</h1>
-
-  <div id="counter">
-    <span id="coins">0</span> монет
+  <!-- СТРАНИЦА 2: СКОРО В ИГРЕ -->
+  <div class="page" id="page-2">
+    <div id="coming-soon">
+      <div id="coming-noise"></div>
+      <h2 id="coming-title">СКОРО В ИГРЕ...</h2>
+      <p id="coming-subtitle">ОН ПРИБЛИЖАЕТСЯ</p>
+    </div>
   </div>
 
-  <div id="per-second">
-    В секунду: <span id="cps">0</span>
+  <!-- НАВИГАЦИЯ МЕЖДУ СТРАНИЦАМИ -->
+  <div id="page-nav">
+    <button id="page-prev" aria-label="Назад">◀</button>
+    <div id="page-dots">
+      <span class="page-dot active" data-page="1"></span>
+      <span class="page-dot" data-page="2"></span>
+    </div>
+    <button id="page-next" aria-label="Вперёд">▶</button>
   </div>
 
-  <div id="hungry-info" style="display:none;">
-    😭 Голодный смайлик: −5M монет/сек
-  </div>
-
-  <div id="gulau-info" style="display:none;">
-    🔥 #Gulau: ×5 тапов, осталось <span id="gulau-timer">15:00</span>
-  </div>
-
-  <div id="prestige-info">
-    💎 Кристаллов: <span id="crystals">0</span>
-  </div>
-
-  <div id="blood-info" style="display:none;">
-    🌕 Кровавая луна! До конца: <span id="blood-timer">30:00</span>
-  </div>
-
-  <div id="shards-info">
-    🌑 Кровавых осколков: <span id="shards">0</span> | ⚔️ Бонус: <span id="item-bonus">+0%</span>
-  </div>
-
-  <div id="tap-row">
-    <button id="deposit-side-btn" title="Вклад">❓</button>
-    <button id="click-btn">ТАП</button>
-  </div>
-
-  <button id="chest-btn">🎁 Открыть сундук</button>
-
-  <div id="shop">
-    <h2>Магазин улучшений</h2>
-    <div id="shop-list"></div>
+  <div id="chest-overlay" class="hidden">
+    <div id="chest-scene">
+      <div id="chest-emoji">🎁</div>
+      <div id="chest-shake">🎁</div>
+      <div id="chest-rewards"></div>
+      <button id="chest-collect" class="chest-collect-btn hidden">✅ Забрать</button>
+    </div>
   </div>
 
   <div id="offline-popup" class="hidden">
@@ -103,6 +140,36 @@
     </div>
   </div>
 
+  <div id="modal-quests" class="modal hidden">
+    <div class="modal-box">
+      <button class="modal-close" data-close="modal-quests">✕</button>
+      <h2>📜 Задания дня</h2>
+      <p id="quests-timer" style="text-align:center;color:#aaa;font-size:13px;margin:0 0 15px;">⏰ Загрузка...</p>
+      <div id="quests-list"></div>
+    </div>
+  </div>
+
+  <div id="modal-leaders" class="modal hidden">
+    <div class="modal-box">
+      <button class="modal-close" data-close="modal-leaders">✕</button>
+      <h2>🥇 Лидеры</h2>
+
+      <div class="leaders-actions">
+        <p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 10px;">
+          Отправь свой рекорд по «Всего заработано»!
+        </p>
+        <input type="text" id="leader-name" placeholder="Твой ник" maxlength="15" autocomplete="off">
+        <button id="leader-submit" class="save-btn" type="button">📤 Отправить рекорд</button>
+      </div>
+
+      <hr style="border-color:#3a7bd5;margin:20px 0;">
+
+      <div id="leaders-list">
+        <p class="leaders-loading">Загрузка...</p>
+      </div>
+    </div>
+  </div>
+
   <div id="modal-skins" class="modal hidden">
     <div class="modal-box">
       <button class="modal-close" data-close="modal-skins">✕</button>
@@ -124,7 +191,8 @@
         <p>За тап: <b><span id="stat-per-click">0</span></b></p>
         <p>Кристаллов: <b><span id="stat-crystals">0</span></b></p>
         <p>Осколков: <b><span id="stat-shards">0</span></b></p>
-        <p>Достижений: <b><span id="stat-ach">0</span> / 30</b></p>
+        <p>Время в игре: <b><span id="stat-time">0</span></b></p>
+        <p>Достижений: <b><span id="stat-ach">0</span> / 40</b></p>
       </div>
     </div>
   </div>
@@ -273,6 +341,19 @@
     </div>
   </div>
 
+  <div id="modal-note" class="modal hidden">
+    <div class="modal-box note-box">
+      <button class="modal-close" data-close="modal-note">✕</button>
+      <h2>📜 Записка</h2>
+      <div class="note-paper">
+        <p class="note-text">«Он заставляет меня нажимать эту чёртову кнопку.</p>
+        <p class="note-text">Я устал. Сутки напролёт я сижу здесь и нажимаю её — ради денег.</p>
+        <p class="note-text">Лишь это поможет…»</p>
+        <p class="note-sign">— ???</p>
+      </div>
+    </div>
+  </div>
+
   <div id="alarm-overlay" class="hidden">
     <div id="alarm-sign">⚠️</div>
     <p id="alarm-text">Ты давно не тапал!<br>Нажми на знак 5 раз</p>
@@ -293,12 +374,16 @@
         <p><b>7.</b> За <b>5 💎</b> во вкладке «Скины» можно купить новый вид кнопки ТАП.</p>
         <p><b>8.</b> В магазине предметов за 🌑 осколки покупаются постоянные бонусы к доходу.</p>
         <p><b>9.</b> Кнопка смайлика сверху-слева от ТАП — это <b>🏦 Вклад</b>. Внутри можно вложить монеты.</p>
-        <p><b>10.</b> <b>Мини-ивенты</b> запускаются в 00, 15, 30, 45 минут каждого часа. <b>Кровавая луна</b> — в 00, 03, 06, 09, 12, 15, 18, 21 часов.</p>
-        <p><b>11.</b> В настройках можно <b>экспортировать</b> и <b>импортировать</b> прогресс.</p>
+        <p><b>10.</b> Вкладка <b>🥇 Лидеры</b> — общий рейтинг всех игроков по «Всего заработано».</p>
+        <p><b>11.</b> Вкладка <b>📜 Задания</b> — 3 ежедневных задания. Обновляются каждые сутки в 6:00.</p>
+        <p><b>12.</b> В настройках можно <b>экспортировать</b> и <b>импортировать</b> прогресс.</p>
+        <p><b>13.</b> Стрелки <b>◀ ▶</b> внизу — переключение между страницами игры.</p>
       </div>
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
