@@ -12,6 +12,7 @@ var lastClickTime=0;
 var GENERATOR_MAX_LEVEL=50,GENERATOR_BASE_COST=100,GENERATOR_COST_MULT=1.5,GENERATOR_DURATION=180;
 var smileSkinUnlocked=false,smileSkinActive=false;
 var lastDisplayedCoins=0;
+var lastShopUpdate=0;
 var DEPOSIT_LEVELS=[
 {level:1,cost:1000000000000000,emoji:"😭"},{level:2,cost:5000000000000000,emoji:"😢"},
 {level:3,cost:15000000000000000,emoji:"😟"},{level:4,cost:50000000000000000,emoji:"😐"},
@@ -232,6 +233,7 @@ if(secretUnlocked&&secretAutoClicker&&secretAutoClickerTimer>0){setTimeout(funct
 if(crystalBoostTimer>0&&crystalBoostMultiplier>1){document.body.classList.add("boost-active");}
 checkDailyBonus();checkRewardTab();checkNoteTab();updateDepositSideButton();updatePahanButton();updateBoostBanner();
 applyOfflineDepositDrop();
+lastDisplayedCoins=coins;
 }catch(e){console.warn("Ошибка загрузки:",e);}}
 
 function getTimeKey(){
@@ -331,7 +333,18 @@ try{bgMusic2=new Audio("sounds/music2.mp3");bgMusic2.loop=false;bgMusic2.volume=
 bgMusic2.addEventListener("ended",function(){playNextMusic();});}catch(e){}
 try{alarmSound=new Audio("sounds/alarm.mp3");alarmSound.loop=true;alarmSound.volume=0.5;}catch(e){}}
 
-function playSound(name){if(!settings.sound)return;var snd=sounds[name];if(!snd)return;try{snd.currentTime=0;snd.play();}catch(e){}}
+// === ЗВУК С ЗАЩИТОЙ ОТ ОЧЕРЕДИ ===
+function playSound(name){
+if(!settings.sound)return;
+var snd=sounds[name];
+if(!snd)return;
+var now=Date.now();
+if(!snd._lastPlay)snd._lastPlay=0;
+if(now-snd._lastPlay<60)return;
+snd._lastPlay=now;
+try{snd.currentTime=0;snd.play();}catch(e){}
+}
+
 function playMusic(){
 if(!settings.music)return;
 var track=(currentMusicIndex===0)?bgMusic:bgMusic2;
@@ -535,7 +548,6 @@ generatorTimer=GENERATOR_DURATION;
 playSound("ui");
 updateGeneratorButton();
 renderGenerator();
-checkAchievements();
 updateUI();
 saveGame();}
 
@@ -644,7 +656,7 @@ var content=document.getElementById("deposit-content");if(!content)return;
 if(!depositUnlocked){
 content.innerHTML='<div class="deposit-emoji">❓</div>'+'<div class="deposit-desc">Купите вклад за <b>1 Qa</b> монет, чтобы открыть смайлика.</div>'+'<div class="deposit-desc" style="color:#aaa;font-size:13px;">Смайлик будет расти с каждым вложением.</div>'+'<button id="deposit-buy-btn" class="deposit-btn" type="button">💰 Купить вклад за 1 Qa</button>';
 var btn=document.getElementById("deposit-buy-btn");
-if(btn){btn.disabled=coins<DEPOSIT_LEVELS[0].cost;btn.onclick=function(){if(coins<DEPOSIT_LEVELS[0].cost)return;coins-=DEPOSIT_LEVELS[0].cost;depositUnlocked=true;depositLevel=1;lastDepositTimeKey=getTimeKey();playSound("eat");renderDeposit();updateDepositSideButton();updateUI();checkAchievements();saveGame();};}
+if(btn){btn.disabled=coins<DEPOSIT_LEVELS[0].cost;btn.onclick=function(){if(coins<DEPOSIT_LEVELS[0].cost)return;coins-=DEPOSIT_LEVELS[0].cost;depositUnlocked=true;depositLevel=1;lastDepositTimeKey=getTimeKey();playSound("eat");renderDeposit();updateDepositSideButton();updateUI();saveGame();};}
 return;}
 var emoji=getCurrentDepositEmoji();var isHungry=depositLevel<=5;var isMax=depositLevel>=25;
 var skinClass="";
@@ -667,7 +679,7 @@ if(!isMax){var nextCost=DEPOSIT_LEVELS[depositLevel].cost;html+='<div class="dep
 else html+='<div class="deposit-desc" style="color:#4caf50;">Достигнут максимум!</div>';
 content.innerHTML=html;
 var btn2=document.getElementById("deposit-buy-btn");
-if(btn2){var need=DEPOSIT_LEVELS[depositLevel].cost;btn2.disabled=coins<need;btn2.onclick=function(){if(coins<need)return;coins-=need;depositLevel++;lastDepositTimeKey=getTimeKey();playSound("eat");addQuestProgress("deposit",1);renderDeposit();updateDepositSideButton();updateUI();checkAchievements();saveGame();};}
+if(btn2){var need=DEPOSIT_LEVELS[depositLevel].cost;btn2.disabled=coins<need;btn2.onclick=function(){if(coins<need)return;coins-=need;depositLevel++;lastDepositTimeKey=getTimeKey();playSound("eat");addQuestProgress("deposit",1);renderDeposit();updateDepositSideButton();updateUI();saveGame();};}
 var emojiEl=document.getElementById("deposit-emoji-el");
 if(emojiEl){emojiEl.style.cursor="pointer";emojiEl.onclick=bossEmojiClick;}}
 
@@ -964,7 +976,7 @@ playSound("achievement");
 var popup=document.createElement("div");popup.className="achievement-popup";popup.textContent="🔥 Автокликер от Pahi запущен на 10 секунд!";
 document.body.appendChild(popup);setTimeout(function(){popup.remove();},3000);
 if(pahanTickInterval)clearInterval(pahanTickInterval);
-pahanTickInterval=setInterval(function(){if(!pahanActive)return;coins+=PAHAN_REWARD_PER_TAP;totalEarned+=PAHAN_REWARD_PER_TAP;totalTaps+=1;addQuestProgress("taps",1);addQuestProgress("earn",PAHAN_REWARD_PER_TAP);updateUI();checkAchievements();},500);
+pahanTickInterval=setInterval(function(){if(!pahanActive)return;coins+=PAHAN_REWARD_PER_TAP;totalEarned+=PAHAN_REWARD_PER_TAP;totalTaps+=1;addQuestProgress("taps",1);addQuestProgress("earn",PAHAN_REWARD_PER_TAP);updateUI();},500);
 if(pahanTimerInterval)clearInterval(pahanTimerInterval);
 pahanTimerInterval=setInterval(function(){if(!pahanActive){clearInterval(pahanTimerInterval);pahanTimerInterval=null;return;}pahanTimer--;
 if(pahanTimer<=0){clearInterval(pahanTimerInterval);pahanTimerInterval=null;stopPahan();}},1000);}
@@ -1047,7 +1059,7 @@ secretClickerInterval=setInterval(function(){
 var value=getClickValue();var add=value*2;coins+=add;totalEarned+=add;
 var tapsToAdd=gulauActive?10:2;totalTaps+=tapsToAdd;
 if(bloodMoonActive&&Math.random()<0.02)shards+=1;
-updateUI();checkAchievements();},30);}
+updateUI();},30);}
 
 function stopSecretAutoClicker(){
 if(secretClickerInterval){clearInterval(secretClickerInterval);secretClickerInterval=null;}
@@ -1112,27 +1124,32 @@ setTimeout(function(){el.remove();},800);
 }
 
 function spawnTapParticles(x,y){
-var count=6+Math.floor(Math.random()*3);
+var now=Date.now();
+if(window.__lastParticleTime&&now-window.__lastParticleTime<150)return;
+window.__lastParticleTime=now;
+var count=4+Math.floor(Math.random()*3);
 for(var i=0;i<count;i++){
 var p=document.createElement("div");
 p.className="tap-particle";
 p.textContent="⭐";
 var angle=(Math.PI*2/count)*i+(Math.random()*0.6-0.3);
-var dist=55+Math.random()*55;
+var dist=45+Math.random()*40;
 p.style.setProperty("--dx",(Math.cos(angle)*dist)+"px");
 p.style.setProperty("--dy",(Math.sin(angle)*dist)+"px");
 p.style.setProperty("--rot",(Math.random()*720-360)+"deg");
 p.style.left=x+"px";
 p.style.top=y+"px";
-p.style.fontSize=(12+Math.random()*10)+"px";
+p.style.fontSize=(10+Math.random()*8)+"px";
 document.body.appendChild(p);
-setTimeout(function(){p.remove();},800);
+setTimeout(function(){p.remove();},600);
 }
 }
 
 function pulseCounter(){
 var el=document.getElementById("counter");
 if(!el)return;
+if(window.__pulseCooldown&&Date.now()-window.__pulseCooldown<200)return;
+window.__pulseCooldown=Date.now();
 el.classList.remove("pulse");
 void el.offsetWidth;
 el.classList.add("pulse");
@@ -1144,24 +1161,26 @@ var el=document.getElementById("coins");
 if(!el)return;
 var current=lastDisplayedCoins;
 if(newValue<=current){el.textContent=formatNumber(newValue);lastDisplayedCoins=newValue;return;}
-var diff=newValue-current;
-var steps=Math.min(20,Math.max(4,Math.floor(diff/500)+4));
-var step=0;
-var startValue=current;
-if(window.__coinsAnimInterval)clearInterval(window.__coinsAnimInterval);
+if(newValue-current<50){el.textContent=formatNumber(newValue);lastDisplayedCoins=newValue;return;}
+window.__coinsTarget=newValue;
+if(window.__coinsAnimRunning)return;
+window.__coinsAnimRunning=true;
 window.__coinsAnimInterval=setInterval(function(){
-step++;
-if(step>=steps){
-el.textContent=formatNumber(newValue);
-lastDisplayedCoins=newValue;
+var target=window.__coinsTarget;
+var cur=lastDisplayedCoins;
+if(target<=cur){
+el.textContent=formatNumber(target);
+lastDisplayedCoins=target;
 clearInterval(window.__coinsAnimInterval);
+window.__coinsAnimRunning=false;
 window.__coinsAnimInterval=null;
 return;
 }
-var v=startValue+(diff*(step/steps));
-el.textContent=formatNumber(v);
-lastDisplayedCoins=v;
-},16);
+var diff=target-cur;
+var stepAmount=Math.max(1,Math.ceil(diff/8));
+lastDisplayedCoins=cur+stepAmount;
+el.textContent=formatNumber(lastDisplayedCoins);
+},50);
 }
 
 function showShardDrop(x,y){
@@ -1178,7 +1197,7 @@ list.appendChild(div);});}
 
 function checkAchievements(){
 achievements.forEach(function(a){if(!unlocked[a.id]&&a.check()){unlocked[a.id]=true;addCrystals(1);showAchievementPopup(a);saveGame();}});
-renderAchievements();}
+}
 
 function showAchievementPopup(a){
 var popup=document.createElement("div");popup.className="achievement-popup";popup.textContent=a.icon+" "+a.title+" (+1 💎)";
@@ -1193,7 +1212,7 @@ document.querySelectorAll(".buy").forEach(function(btn){btn.onclick=function(){
 var id=btn.dataset.id;var up=upgrades[id];
 if(coins>=up.cost){coins-=up.cost;up.count++;up.cost=Math.floor(up.baseCost*Math.pow(1.15,up.count));
 if(up.effect==="click")coinsPerClick+=up.amount;
-addQuestProgress("upgrades",1);playSound("ui");updateUI();checkAchievements();checkRewardTab();saveGame();}};});}
+addQuestProgress("upgrades",1);playSound("ui");updateUI();checkRewardTab();saveGame();}};});}
 
 function updateUI(){
 setCoinsAnimated(coins);
@@ -1201,10 +1220,14 @@ document.getElementById("cps").textContent=formatNumber(getCPS())+(goldenMultipl
 document.getElementById("crystals").textContent=crystals;
 var shardsEl=document.getElementById("shards");if(shardsEl)shardsEl.textContent=shards;
 var ib=document.getElementById("item-bonus");if(ib)ib.textContent="+"+Math.round((getItemBonus()-1)*100)+"%";
+var now=Date.now();
+if(now-lastShopUpdate>500){
+lastShopUpdate=now;
 for(var id in upgrades){var up=upgrades[id];
 var owned=document.getElementById("owned-"+id),cost=document.getElementById("cost-"+id);
 if(owned)owned.textContent=up.count;if(cost)cost.textContent=formatNumber(up.cost);
 var btn=document.querySelector('.buy[data-id="'+id+'"]');if(btn)btn.disabled=coins<up.cost;}
+}
 var secretModal=document.getElementById("modal-secret");if(secretModal&&!secretModal.classList.contains("hidden"))updateSecretUI();
 var depositModal=document.getElementById("modal-deposit");if(depositModal&&!depositModal.classList.contains("hidden"))renderDeposit();
 var itemsModal=document.getElementById("modal-items");
@@ -1239,7 +1262,7 @@ showFloatPlus(x,y,value);
 spawnTapParticles(x,y);
 pulseCounter();
 if(bloodMoonActive&&Math.random()<0.01){shards+=1;showShardDrop(x,y);}
-playSound("click");updateUI();checkAchievements();resetAlarmTimer();saveGame();};
+playSound("click");updateUI();resetAlarmTimer();saveGame();};
 
 var depositSideBtn=document.getElementById("deposit-side-btn");
 if(depositSideBtn){depositSideBtn.onclick=function(){playSound("ui");renderDeposit();document.getElementById("modal-deposit").classList.remove("hidden");updateDepositSideButton();};}
