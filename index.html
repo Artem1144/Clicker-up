@@ -31,42 +31,28 @@
     </div>
 
     <div id="event-banner" class="hidden"></div>
+    <div id="boost-banner" class="hidden"></div>
 
     <h1 id="logo">💰 Clicker up</h1>
 
-    <div id="counter">
-      <span id="coins">0</span> монет
-    </div>
+    <div id="counter"><span id="coins">0</span> монет</div>
+    <div id="per-second">В секунду: <span id="cps">0</span></div>
 
-    <div id="per-second">
-      В секунду: <span id="cps">0</span>
-    </div>
-
-    <div id="hungry-info" style="display:none;">
-      😭 Голодный смайлик: −5M монет/сек
-    </div>
-
-    <div id="gulau-info" style="display:none;">
-      🔥 #Gulau: ×5 тапов, осталось <span id="gulau-timer">15:00</span>
-    </div>
-
-    <div id="prestige-info">
-      💎 Кристаллов: <span id="crystals">0</span>
-    </div>
-
-    <div id="blood-info" style="display:none;">
-      🌕 Кровавая луна! До конца: <span id="blood-timer">30:00</span>
-    </div>
-
-    <div id="shards-info">
-      🌑 Кровавых осколков: <span id="shards">0</span> | ⚔️ Бонус: <span id="item-bonus">+0%</span>
-    </div>
+    <div id="hungry-info" style="display:none;">😭 Голодный смайлик: −5M монет/сек</div>
+    <div id="gulau-info" style="display:none;">🔥 #Gulau: ×5 тапов, осталось <span id="gulau-timer">15:00</span></div>
+    <div id="prestige-info">💎 Кристаллов: <span id="crystals">0</span> / 1000</div>
+    <div id="blood-info" style="display:none;">🌕 Кровавая луна! До конца: <span id="blood-timer">30:00</span></div>
+    <div id="shards-info">🌑 Кровавых осколков: <span id="shards">0</span> | ⚔️ Бонус: <span id="item-bonus">+0%</span></div>
 
     <div id="tap-row">
       <button id="deposit-side-btn" title="Вклад">❓</button>
-      <button id="click-btn">ТАП</button>
+      <button id="click-btn">
+        <span id="tap-cooldown-text"></span>
+        <span id="tap-label">ТАП</span>
+      </button>
     </div>
 
+    <button id="generator-btn">⚡ Генератор: Ур. 1</button>
     <button id="chest-btn">🎁 Открыть сундук</button>
 
     <div id="shop">
@@ -121,14 +107,29 @@
     </div>
   </div>
 
+  <div id="modal-generator" class="modal hidden">
+    <div class="modal-box">
+      <button class="modal-close" data-close="modal-generator">✕</button>
+      <h2>⚡ Генератор кнопки</h2>
+      <div class="modal-content" id="generator-content"></div>
+    </div>
+  </div>
+
   <div id="modal-items" class="modal hidden">
     <div class="modal-box">
       <button class="modal-close" data-close="modal-items">✕</button>
-      <h2>🛒 Магазин предметов</h2>
+      <h2>🛒 Магазин</h2>
       <p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 15px;">
-        У вас: <span id="items-shards">0</span> 🌑
+        🌑 Осколков: <span id="items-shards">0</span> | 💎 Кристаллов: <span id="items-crystals">0</span>
       </p>
+
+      <h3 style="color:#d0a0ff;margin:15px 0 10px;font-size:15px;">🌑 Предметы за осколки</h3>
       <div id="items-list"></div>
+
+      <hr style="border-color:#3a7bd5;margin:25px 0;">
+
+      <h3 style="color:#4fc3f7;margin:15px 0 10px;font-size:15px;">💎 Товары за кристаллы</h3>
+      <div id="crystal-list"></div>
     </div>
   </div>
 
@@ -173,9 +174,17 @@
   <div id="modal-skins" class="modal hidden">
     <div class="modal-box">
       <button class="modal-close" data-close="modal-skins">✕</button>
-      <h2>🎨 Скины кнопки</h2>
-      <p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 15px;">Каждый скин — 5 💎</p>
+      <h2>🎨 Скины</h2>
+
+      <h3 style="color:#f4d35e;margin:10px 0 8px;font-size:15px;">🖲️ Кнопка ТАП</h3>
+      <p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 10px;">Каждый скин — 5 💎</p>
       <div id="skins-list" class="skins-grid"></div>
+
+      <hr style="border-color:#3a7bd5;margin:20px 0;">
+
+      <h3 style="color:#ff5252;margin:10px 0 8px;font-size:15px;">🎭 Смайлик вклада</h3>
+      <p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 10px;">Только через промокод</p>
+      <div id="smile-skins-list" class="skins-grid"></div>
     </div>
   </div>
 
@@ -192,7 +201,7 @@
         <p>Кристаллов: <b><span id="stat-crystals">0</span></b></p>
         <p>Осколков: <b><span id="stat-shards">0</span></b></p>
         <p>Время в игре: <b><span id="stat-time">0</span></b></p>
-        <p>Достижений: <b><span id="stat-ach">0</span> / 40</b></p>
+        <p>Достижений: <b><span id="stat-ach">0</span> / 53</b></p>
       </div>
     </div>
   </div>
@@ -256,6 +265,8 @@
             <p id="import-result" class="save-result"></p>
           </div>
         </div>
+        <hr style="border-color:#3a7bd5;margin:20px 0;">
+        <button id="pahan-btn" class="advanced-btn hidden" type="button" style="background:linear-gradient(135deg,#7b1fa2,#e91e63);color:white;border:none;font-weight:bold;">🔥 Автокликер от Pahi</button>
         <hr style="border-color:#3a7bd5;margin:20px 0;">
         <button id="advanced-btn" class="advanced-btn" type="button">🔧 Дополнительные настройки</button>
         <hr style="border-color:#3a7bd5;margin:20px 0;">
@@ -369,15 +380,18 @@
         <p><b>2.</b> Покупайте улучшения в магазине — они приносят монеты автоматически.</p>
         <p><b>3.</b> Иногда появляется 🪙 золотая монетка — тапните, даст x7 доход на 30 секунд и шанс на 💎.</p>
         <p><b>4.</b> Выполняйте достижения — за каждое даётся <b>+1 💎</b>.</p>
-        <p><b>5.</b> Сундук можно открывать <b>раз в час</b> — даёт кристаллы и монеты.</p>
+        <p><b>5.</b> Сундук можно открывать <b>раз в час</b> — даёт кристаллы, монеты и осколки.</p>
         <p><b>6.</b> Пока вас нет — фермы работают. При возвращении получите оффлайн-доход (до 8 часов).</p>
         <p><b>7.</b> За <b>5 💎</b> во вкладке «Скины» можно купить новый вид кнопки ТАП.</p>
-        <p><b>8.</b> В магазине предметов за 🌑 осколки покупаются постоянные бонусы к доходу.</p>
-        <p><b>9.</b> Кнопка смайлика сверху-слева от ТАП — это <b>🏦 Вклад</b>. Внутри можно вложить монеты.</p>
-        <p><b>10.</b> Вкладка <b>🥇 Лидеры</b> — общий рейтинг всех игроков по «Всего заработано».</p>
-        <p><b>11.</b> Вкладка <b>📜 Задания</b> — 3 ежедневных задания. Обновляются каждые сутки в 6:00.</p>
-        <p><b>12.</b> В настройках можно <b>экспортировать</b> и <b>импортировать</b> прогресс.</p>
-        <p><b>13.</b> Стрелки <b>◀ ▶</b> внизу — переключение между страницами игры.</p>
+        <p><b>8.</b> В магазине предметов за 🌑 осколки покупаются постоянные бонусы к доходу. Каждый предмет имеет <b>3 уровня</b>.</p>
+        <p><b>9.</b> Кнопка смайлика сверху-слева от ТАП — это <b>🏦 Вклад</b>. Каждые 30 минут уровень падает на 1–3.</p>
+        <p><b>10.</b> Кнопка <b>⚡ Генератор</b> под ТАП — прокачивает скорость кнопки ТАП. Ур. 1 = 1 тап в 1 сек, ур. 50 = 20 тапов в секунду.</p>
+        <p><b>11.</b> Вкладка <b>🥇 Лидеры</b> — общий рейтинг всех игроков по «Всего заработано».</p>
+        <p><b>12.</b> Вкладка <b>📜 Задания</b> — 3 ежедневных задания. Обновляются каждые сутки в 6:00.</p>
+        <p><b>13.</b> В настройках можно <b>экспортировать</b> и <b>импортировать</b> прогресс.</p>
+        <p><b>14.</b> Стрелки <b>◀ ▶</b> внизу — переключение между страницами игры.</p>
+        <p><b>15.</b> Максимум кристаллов — <b>1000</b>. Излишек автоматически превращается в монеты.</p>
+        <p><b>16.</b> Во вкладке <b>🛒 Магазин</b> есть вторая секция — товары за 💎 кристаллы (бусты, монеты, вклад).</p>
       </div>
     </div>
   </div>
@@ -386,4 +400,4 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
   <script src="game.js"></script>
 </body>
-</html>
+          </html>
