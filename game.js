@@ -253,11 +253,7 @@ return new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]),parse
 function applyOfflineDepositDrop(){
 if(!depositUnlocked||depositLevel<1)return;
 var nowKey=getTimeKey();
-if(!lastDepositTimeKey){
-lastDepositTimeKey=nowKey;
-saveGame();
-return;
-}
+if(!lastDepositTimeKey){lastDepositTimeKey=nowKey;saveGame();return;}
 if(lastDepositTimeKey===nowKey)return;
 var lastMs=getTimeKeyValue(lastDepositTimeKey);
 var nowMs=getTimeKeyValue(nowKey);
@@ -266,10 +262,7 @@ var ticks=Math.floor((nowMs-lastMs)/HALF);
 if(ticks<=0){lastDepositTimeKey=nowKey;saveGame();return;}
 if(ticks>500)ticks=500;
 var totalDrop=0;
-for(var i=0;i<ticks;i++){
-var drop=Math.random()<0.5?1:3;
-totalDrop+=drop;
-}
+for(var i=0;i<ticks;i++){var drop=Math.random()<0.5?1:3;totalDrop+=drop;}
 var before=depositLevel;
 depositLevel=Math.max(1,depositLevel-totalDrop);
 if(depositLevel!==before){
@@ -296,10 +289,7 @@ var HALF=30*60*1000;
 var ticks=Math.floor((nowMs-lastMs)/HALF);
 if(ticks<=0){lastDepositTimeKey=nowKey;return;}
 var totalDrop=0;
-for(var i=0;i<ticks;i++){
-var drop=Math.random()<0.5?1:3;
-totalDrop+=drop;
-}
+for(var i=0;i<ticks;i++){var drop=Math.random()<0.5?1:3;totalDrop+=drop;}
 var before=depositLevel;
 depositLevel=Math.max(1,depositLevel-totalDrop);
 lastDepositTimeKey=nowKey;
@@ -333,14 +323,12 @@ try{bgMusic2=new Audio("sounds/music2.mp3");bgMusic2.loop=false;bgMusic2.volume=
 bgMusic2.addEventListener("ended",function(){playNextMusic();});}catch(e){}
 try{alarmSound=new Audio("sounds/alarm.mp3");alarmSound.loop=true;alarmSound.volume=0.5;}catch(e){}}
 
-// === ЗВУК С ЗАЩИТОЙ ОТ ОЧЕРЕДИ ===
 function playSound(name){
 if(!settings.sound)return;
-var snd=sounds[name];
-if(!snd)return;
+var snd=sounds[name];if(!snd)return;
 var now=Date.now();
 if(!snd._lastPlay)snd._lastPlay=0;
-if(now-snd._lastPlay<60)return;
+if(now-snd._lastPlay<80)return;
 snd._lastPlay=now;
 try{snd.currentTime=0;snd.play();}catch(e){}
 }
@@ -529,14 +517,11 @@ if(generatorLevel<1)return 1;
 return Math.max(1,Math.floor(generatorLevel/2.5));
 }
 
-function getGeneratorCooldownMs(){
-return Math.round(1000/getGeneratorCPS());
-}
+function getGeneratorCooldownMs(){return Math.round(1000/getGeneratorCPS());}
 
 function getGeneratorCost(){
 if(generatorLevel>=GENERATOR_MAX_LEVEL)return Infinity;
-return Math.round(GENERATOR_BASE_COST*Math.pow(GENERATOR_COST_MULT,generatorLevel-1));
-}
+return Math.round(GENERATOR_BASE_COST*Math.pow(GENERATOR_COST_MULT,generatorLevel-1));}
 
 function upgradeGenerator(){
 if(generatorLevel>=GENERATOR_MAX_LEVEL)return;
@@ -595,13 +580,11 @@ html+='<div class="generator-stat">Скорость: <b>'+cpsText+'</b></div>';
 html+='<div class="generator-stat">До падения: <b>'+m+':'+(s<10?"0":"")+s+'</b></div>';
 html+='<div class="generator-bar"><div class="generator-bar-fill" style="width:'+progressPercent+'%"></div></div>';
 html+='<div class="generator-warning">⚠️ Раз в 3 минуты уровень падает на 1–5</div>';
-
 if(!isMax){
 html+='<div class="deposit-desc">Улучшить: <b>'+formatNumber(nextCost)+'</b> монет</div>';
 html+='<button id="generator-upgrade-btn" class="deposit-btn" type="button">⚡ Улучшить</button>';
 }else{
 html+='<div class="deposit-happy">✨ Максимальный уровень!</div>';}
-
 content.innerHTML=html;
 var btn=document.getElementById("generator-upgrade-btn");
 if(btn){btn.disabled=coins<nextCost;btn.onclick=upgradeGenerator;}}
@@ -616,8 +599,7 @@ var cooldownInterval=null;
 function startCooldownUI(){
 if(cooldownInterval)return;
 cooldownInterval=setInterval(function(){
-var btn=document.getElementById("click-btn");
-if(!btn)return;
+var btn=document.getElementById("click-btn");if(!btn)return;
 if(generatorLevel>=20){
 btn.classList.remove("cooldown");
 btn.classList.add("tap-ready");
@@ -660,10 +642,7 @@ if(btn){btn.disabled=coins<DEPOSIT_LEVELS[0].cost;btn.onclick=function(){if(coin
 return;}
 var emoji=getCurrentDepositEmoji();var isHungry=depositLevel<=5;var isMax=depositLevel>=25;
 var skinClass="";
-if(smileSkinActive&&smileSkinUnlocked){
-skinClass=" skin-blood";
-if(depositLevel>=21)skinClass+=" gold-spark";
-}
+if(smileSkinActive&&smileSkinUnlocked){skinClass=" skin-blood";if(depositLevel>=21)skinClass+=" gold-spark";}
 var emojiHtml;
 if(smileSkinActive&&smileSkinUnlocked){
 emojiHtml='<div class="deposit-emoji'+skinClass+(isHungry?' hungry':'')+'" id="deposit-emoji-el"><span class="emoji-inner">'+emoji+'</span></div>';
@@ -1125,21 +1104,21 @@ setTimeout(function(){el.remove();},800);
 
 function spawnTapParticles(x,y){
 var now=Date.now();
-if(window.__lastParticleTime&&now-window.__lastParticleTime<150)return;
+if(window.__lastParticleTime&&now-window.__lastParticleTime<250)return;
 window.__lastParticleTime=now;
-var count=4+Math.floor(Math.random()*3);
+var count=3+Math.floor(Math.random()*2);
 for(var i=0;i<count;i++){
 var p=document.createElement("div");
 p.className="tap-particle";
 p.textContent="⭐";
 var angle=(Math.PI*2/count)*i+(Math.random()*0.6-0.3);
-var dist=45+Math.random()*40;
+var dist=40+Math.random()*35;
 p.style.setProperty("--dx",(Math.cos(angle)*dist)+"px");
 p.style.setProperty("--dy",(Math.sin(angle)*dist)+"px");
 p.style.setProperty("--rot",(Math.random()*720-360)+"deg");
 p.style.left=x+"px";
 p.style.top=y+"px";
-p.style.fontSize=(10+Math.random()*8)+"px";
+p.style.fontSize=(10+Math.random()*6)+"px";
 document.body.appendChild(p);
 setTimeout(function(){p.remove();},600);
 }
@@ -1148,8 +1127,9 @@ setTimeout(function(){p.remove();},600);
 function pulseCounter(){
 var el=document.getElementById("counter");
 if(!el)return;
-if(window.__pulseCooldown&&Date.now()-window.__pulseCooldown<200)return;
-window.__pulseCooldown=Date.now();
+var nowPulse=Date.now();
+if(window.__pulseCooldown&&nowPulse-window.__pulseCooldown<200&&nowPulse>=window.__pulseCooldown)return;
+window.__pulseCooldown=nowPulse;
 el.classList.remove("pulse");
 void el.offsetWidth;
 el.classList.add("pulse");
@@ -1161,25 +1141,24 @@ var el=document.getElementById("coins");
 if(!el)return;
 var current=lastDisplayedCoins;
 if(newValue<=current){el.textContent=formatNumber(newValue);lastDisplayedCoins=newValue;return;}
-if(newValue-current<50){el.textContent=formatNumber(newValue);lastDisplayedCoins=newValue;return;}
-window.__coinsTarget=newValue;
-if(window.__coinsAnimRunning)return;
-window.__coinsAnimRunning=true;
+var diff=newValue-current;
+if(diff<50){el.textContent=formatNumber(newValue);lastDisplayedCoins=newValue;return;}
+var steps=Math.min(12,Math.max(3,Math.floor(diff/500)+3));
+var step=0;
+var startValue=current;
+if(window.__coinsAnimInterval){clearInterval(window.__coinsAnimInterval);window.__coinsAnimInterval=null;}
 window.__coinsAnimInterval=setInterval(function(){
-var target=window.__coinsTarget;
-var cur=lastDisplayedCoins;
-if(target<=cur){
-el.textContent=formatNumber(target);
-lastDisplayedCoins=target;
+step++;
+if(step>=steps){
+el.textContent=formatNumber(newValue);
+lastDisplayedCoins=newValue;
 clearInterval(window.__coinsAnimInterval);
-window.__coinsAnimRunning=false;
 window.__coinsAnimInterval=null;
 return;
 }
-var diff=target-cur;
-var stepAmount=Math.max(1,Math.ceil(diff/8));
-lastDisplayedCoins=cur+stepAmount;
-el.textContent=formatNumber(lastDisplayedCoins);
+var v=startValue+(diff*(step/steps));
+el.textContent=formatNumber(v);
+lastDisplayedCoins=v;
 },50);
 }
 
@@ -1229,12 +1208,11 @@ if(owned)owned.textContent=up.count;if(cost)cost.textContent=formatNumber(up.cos
 var btn=document.querySelector('.buy[data-id="'+id+'"]');if(btn)btn.disabled=coins<up.cost;}
 }
 var secretModal=document.getElementById("modal-secret");if(secretModal&&!secretModal.classList.contains("hidden"))updateSecretUI();
-var depositModal=document.getElementById("modal-deposit");if(depositModal&&!depositModal.classList.contains("hidden"))renderDeposit();
 var itemsModal=document.getElementById("modal-items");
 if(itemsModal&&!itemsModal.classList.contains("hidden")){
 var shardsEl2=document.getElementById("items-shards"),crystalsEl2=document.getElementById("items-crystals");
 if(shardsEl2)shardsEl2.textContent=shards;if(crystalsEl2)crystalsEl2.textContent=crystals;}
-updateGeneratorUI();}
+}
 
 function updateStats(){
 document.getElementById("stat-coins").textContent=formatNumber(coins);
@@ -1262,7 +1240,14 @@ showFloatPlus(x,y,value);
 spawnTapParticles(x,y);
 pulseCounter();
 if(bloodMoonActive&&Math.random()<0.01){shards+=1;showShardDrop(x,y);}
-playSound("click");updateUI();resetAlarmTimer();saveGame();};
+playSound("click");
+// Мгновенно обновляем счётчик монет и CPS, чтобы не пропадал доход в секунду
+if(window.__coinsAnimInterval){clearInterval(window.__coinsAnimInterval);window.__coinsAnimInterval=null;}
+lastDisplayedCoins=coins;
+document.getElementById("coins").textContent=formatNumber(coins);
+document.getElementById("cps").textContent=formatNumber(getCPS())+(goldenMultiplier>1?" (x7!)":"");
+resetAlarmTimer();
+};
 
 var depositSideBtn=document.getElementById("deposit-side-btn");
 if(depositSideBtn){depositSideBtn.onclick=function(){playSound("ui");renderDeposit();document.getElementById("modal-deposit").classList.remove("hidden");updateDepositSideButton();};}
