@@ -1,6 +1,6 @@
 {
-  "name": "Clicker up",
-  "short_name": "Clicker up",
+  "name": "Krochlupic Up",
+  "short_name": "Krochlupic Up",
   "description": "Игра-кликер: тапай, улучшайся, покупай скины и выполняй достижения!",
   "start_url": "./index.html",
   "display": "standalone",
