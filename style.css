@@ -200,7 +200,7 @@ body.blood-moon #counter {
   visibility: hidden;
 }
 
-/* Скин GENNADII — бежевая кнопка + розовый круг + маленький тёмно-розовый овал */
+/* Скин GENNADII */
 #click-btn.skin-gennadii {
   background: radial-gradient(circle at 50% 50%,
     #f4a8c0 0%,
@@ -309,7 +309,120 @@ body.blood-moon #counter {
   50% { box-shadow: 0 4px 0 #c78e10, 0 0 30px rgba(255, 235, 59, 0.8); }
 }
 
-/* === КРОВАВЫЙ СКИН СМАЙЛИКА === */
+/* === КНОПКА ПРОФИЛЯ === */
+#profile-side-btn {
+  position: fixed;
+  left: 15px;
+  top: 15px;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #e0c25a, #d97a1a);
+  color: #1a1a2e;
+  font-size: 26px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #9a5310;
+  transition: transform 0.05s;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 100;
+}
+
+#profile-side-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #9a5310;
+}
+
+/* === ОБУЧЕНИЕ === */
+#tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#tutorial-overlay.hidden { display: none; }
+
+#tutorial-content {
+  background: #16213e;
+  border: 2px solid #e0c25a;
+  border-radius: 15px;
+  padding: 30px 25px;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  animation: tutorialIn 0.4s ease-out;
+}
+
+@keyframes tutorialIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+#tutorial-finger {
+  font-size: 72px;
+  margin-bottom: 20px;
+  animation: fingerBob 1.5s ease-in-out infinite;
+}
+
+@keyframes fingerBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+#tutorial-text {
+  font-size: 17px;
+  color: #e0e0e0;
+  line-height: 1.5;
+  margin-bottom: 25px;
+  min-height: 60px;
+  font-weight: 600;
+}
+
+#tutorial-next {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #e0c25a, #d97a1a);
+  border: none;
+  color: #1a1a2e;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #9a5310;
+  text-shadow: none;
+}
+
+#tutorial-next:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #9a5310;
+}
+
+#tutorial-skip {
+  margin-top: 12px;
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 5px;
+}
+
+#tutorial-skip:active { color: #e0c25a; }
+
 .deposit-emoji {
   font-size: 80px;
   text-align: center;
@@ -545,7 +658,6 @@ body.blood-moon #counter {
   100% { opacity: 0; transform: translateY(-80px); }
 }
 
-/* === ЧАСТИЦЫ-ЗВЁЗДОЧКИ ПРИ ТАПЕ === */
 .tap-particle {
   position: fixed;
   font-size: 18px;
@@ -1357,6 +1469,57 @@ body.blood-moon #counter {
   text-shadow: none;
 }
 
+/* === СПИСОК ЗАПИСОК === */
+.note-list-item {
+  background: linear-gradient(135deg, #f4ecd8, #e8dcc0);
+  color: #3a2c1a;
+  border: 2px solid #8b7355;
+  border-radius: 10px;
+  padding: 15px 18px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  text-align: left;
+  text-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.note-list-item:active {
+  transform: scale(0.97);
+}
+
+.note-list-item:hover {
+  box-shadow: 0 0 12px rgba(212, 197, 160, 0.5);
+}
+
+.note-list-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.note-list-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.note-list-title {
+  font-weight: bold;
+  font-size: 15px;
+  color: #3a2c1a;
+  margin-bottom: 3px;
+}
+
+.note-list-preview {
+  font-size: 12px;
+  color: #6b5a3f;
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .leaders-actions { margin: 15px 0; }
 
 #leader-name {
@@ -1369,6 +1532,13 @@ body.blood-moon #counter {
   font-size: 15px;
   box-sizing: border-box;
   margin-bottom: 8px;
+}
+
+#leader-name[readonly] {
+  background: #0a1320;
+  color: #e0c25a;
+  font-weight: bold;
+  cursor: not-allowed;
 }
 
 #leader-name::placeholder { color: #666; }
