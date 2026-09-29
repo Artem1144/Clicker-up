@@ -15,10 +15,8 @@
 </head>
 <body>
 
-  <!-- Кнопка профиля -->
   <button id="profile-side-btn" title="Профиль">🏅</button>
 
-  <!-- СТРАНИЦА 1: КЛИКЕР -->
   <div class="page page-active" id="page-1">
 
     <div id="topbar">
@@ -66,7 +64,6 @@
 
   </div>
 
-  <!-- СТРАНИЦА 2: СКОРО В ИГРЕ -->
   <div class="page" id="page-2">
     <div id="coming-soon">
       <div id="coming-noise"></div>
@@ -75,7 +72,6 @@
     </div>
   </div>
 
-  <!-- НАВИГАЦИЯ МЕЖДУ СТРАНИЦАМИ -->
   <div id="page-nav">
     <button id="page-prev" aria-label="Назад">◀</button>
     <div id="page-dots">
@@ -103,7 +99,6 @@
     </div>
   </div>
 
-  <!-- МОДАЛКА ПРОФИЛЯ -->
   <div id="modal-profile" class="modal hidden">
     <div class="modal-box">
       <button class="modal-close" data-close="modal-profile">✕</button>
@@ -117,7 +112,6 @@
     </div>
   </div>
 
-  <!-- ОВЕРЛЕЙ ОБУЧЕНИЯ -->
   <div id="tutorial-overlay" class="hidden">
     <div id="tutorial-content">
       <div id="tutorial-finger">👆</div>
@@ -150,12 +144,9 @@
       <p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 15px;">
         🌑 Осколков: <span id="items-shards">0</span> | 💎 Кристаллов: <span id="items-crystals">0</span>
       </p>
-
       <h3 style="color:#d0a0ff;margin:15px 0 10px;font-size:15px;">🌑 Предметы за осколки</h3>
       <div id="items-list"></div>
-
       <hr style="border-color:#3a7bd5;margin:25px 0;">
-
       <h3 style="color:#4fc3f7;margin:15px 0 10px;font-size:15px;">💎 Товары за кристаллы</h3>
       <div id="crystal-list"></div>
     </div>
@@ -203,13 +194,10 @@
     <div class="modal-box">
       <button class="modal-close" data-close="modal-skins">✕</button>
       <h2>🎨 Скины</h2>
-
       <h3 style="color:#f4d35e;margin:10px 0 8px;font-size:15px;">🖲️ Кнопка ТАП</h3>
       <p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 10px;">Каждый скин — 5 💎</p>
       <div id="skins-list" class="skins-grid"></div>
-
       <hr style="border-color:#3a7bd5;margin:20px 0;">
-
       <h3 style="color:#ff5252;margin:10px 0 8px;font-size:15px;">🎭 Смайлик вклада</h3>
       <p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 10px;">Только через промокод</p>
       <div id="smile-skins-list" class="skins-grid"></div>
@@ -269,9 +257,7 @@
         <hr style="border-color:#3a7bd5;margin:20px 0;">
         <div class="save-block">
           <p style="color:#f4d35e;font-size:14px;margin:0 0 8px;">💾 Сохранение прогресса</p>
-
           <button id="export-btn" class="save-btn" type="button">📤 Экспортировать прогресс</button>
-
           <div id="export-box" class="save-box hidden">
             <p class="save-hint">Скопируйте этот код и сохраните себе. Потом сможете восстановить прогресс.</p>
             <textarea id="export-text" class="save-text" readonly></textarea>
@@ -280,9 +266,7 @@
               <button id="export-close" class="save-small-btn" type="button">✖ Закрыть</button>
             </div>
           </div>
-
           <button id="import-btn" class="save-btn" type="button">📥 Импортировать прогресс</button>
-
           <div id="import-box" class="save-box hidden">
             <p class="save-hint">Вставьте код, сохранённый ранее.</p>
             <textarea id="import-text" class="save-text" placeholder="Вставьте сюда код..."></textarea>
@@ -298,6 +282,37 @@
         <hr style="border-color:#3a7bd5;margin:20px 0;">
         <button id="advanced-btn" class="advanced-btn" type="button">🔧 Дополнительные настройки</button>
         <hr style="border-color:#3a7bd5;margin:20px 0;">
+
+        <!-- НОВЫЙ БЛОК: КОНТАКТЫ -->
+        <div class="contacts-block">
+          <p class="contacts-title">📞 Связь с разработчиком</p>
+
+          <a href="https://t.me/KrochlupicUp23" target="_blank" rel="noopener" class="contact-link telegram">
+            <span class="contact-icon">💬</span>
+            <span class="contact-text">
+              <span class="contact-label">Телеграм-канал</span>
+              <span class="contact-url">t.me/KrochlupicUp23</span>
+            </span>
+          </a>
+
+          <a href="https://vk.ru/krochlupic_up" target="_blank" rel="noopener" class="contact-link vk">
+            <span class="contact-icon">🌐</span>
+            <span class="contact-text">
+              <span class="contact-label">Канал ВКонтакте</span>
+              <span class="contact-url">vk.ru/krochlupic_up</span>
+            </span>
+          </a>
+
+          <a href="https://t.me/Sup_Krochlupic_Up" target="_blank" rel="noopener" class="contact-link support">
+            <span class="contact-icon">✍️</span>
+            <span class="contact-text">
+              <span class="contact-label">Связь с разработчиком</span>
+              <span class="contact-url">@Sup_Krochlupic_Up</span>
+            </span>
+          </a>
+        </div>
+
+        <hr style="border-color:#3a7bd5;margin:20px 0;">
         <button id="settings-reset" class="danger-btn" type="button">Сбросить весь прогресс</button>
       </div>
     </div>
@@ -309,36 +324,20 @@
       <h2>⚡ Кликер 67</h2>
       <div class="modal-content">
         <p style="text-align:center;font-size:48px;margin:10px 0;">🔥</p>
-        <p style="text-align:center;color:#ff5252;font-weight:bold;font-size:16px;">
-          Секретный автокликер
-        </p>
-        <p style="text-align:center;color:#ddd;">
-          Делает <b>67 кликов в секунду</b> автоматически.
-        </p>
-
+        <p style="text-align:center;color:#ff5252;font-weight:bold;font-size:16px;">Секретный автокликер</p>
+        <p style="text-align:center;color:#ddd;">Делает <b>67 кликов в секунду</b> автоматически.</p>
         <div id="secret-locked" style="margin-top:20px;">
-          <p style="text-align:center;color:#aaa;font-size:13px;">
-            Для разблокировки нужно сделать <b style="color:#f4d35e;">6767 тапов</b>
-          </p>
-          <p style="text-align:center;color:#aaa;font-size:13px;">
-            У вас: <b style="color:#4fc3f7;"><span id="secret-taps">0</span></b>
-          </p>
+          <p style="text-align:center;color:#aaa;font-size:13px;">Для разблокировки нужно сделать <b style="color:#f4d35e;">6767 тапов</b></p>
+          <p style="text-align:center;color:#aaa;font-size:13px;">У вас: <b style="color:#4fc3f7;"><span id="secret-taps">0</span></b></p>
           <div style="background:#0e1a30;border-radius:10px;height:20px;margin:15px 0;overflow:hidden;">
             <div id="secret-progress" style="height:100%;width:0%;background:linear-gradient(90deg,#b71c1c,#ff5252);transition:width 0.3s;"></div>
           </div>
           <button id="secret-unlock" class="secret-btn" type="button">🔒 Разблокировать</button>
         </div>
-
         <div id="secret-unlocked" style="display:none;margin-top:20px;">
-          <p style="text-align:center;color:#4caf50;font-weight:bold;">
-            ✅ Автокликер разблокирован!
-          </p>
-          <button id="secret-toggle" class="secret-btn secret-on" type="button">
-            🔥 Активировать (67 Qa)
-          </button>
-          <p id="secret-status" style="text-align:center;color:#aaa;font-size:13px;margin-top:10px;">
-            Разблокирован. Активация: 67 Qa за 30 минут.
-          </p>
+          <p style="text-align:center;color:#4caf50;font-weight:bold;">✅ Автокликер разблокирован!</p>
+          <button id="secret-toggle" class="secret-btn secret-on" type="button">🔥 Активировать (67 Qa)</button>
+          <p id="secret-status" style="text-align:center;color:#aaa;font-size:13px;margin-top:10px;">Разблокирован. Активация: 67 Qa за 30 минут.</p>
         </div>
       </div>
     </div>
@@ -368,19 +367,14 @@
       <h2>🏅 Награда</h2>
       <div class="modal-content" style="text-align:center;">
         <p style="font-size:64px;margin:20px 0;">👆</p>
-        <p style="font-size:18px;color:#f4d35e;font-weight:bold;">
-          Вы прокачали Кликер до 228 уровня!
-        </p>
-        <p style="font-size:14px;color:#ddd;margin:15px 0;">
-          За это полагается особая награда.
-        </p>
+        <p style="font-size:18px;color:#f4d35e;font-weight:bold;">Вы прокачали Кликер до 228 уровня!</p>
+        <p style="font-size:14px;color:#ddd;margin:15px 0;">За это полагается особая награда.</p>
         <button id="reward-claim" class="deposit-btn" type="button" style="margin-top:20px;">🎁 Забрать награду</button>
         <p id="reward-result" style="font-size:15px;font-weight:bold;margin-top:15px;min-height:20px;"></p>
       </div>
     </div>
   </div>
 
-  <!-- МОДАЛКА ЗАПИСОК (список + просмотр) -->
   <div id="modal-note" class="modal hidden">
     <div class="modal-box note-box">
       <button class="modal-close" data-close="modal-note">✕</button>
@@ -435,4 +429,4 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
   <script src="game.js"></script>
 </body>
-</html>
+          </html>
