@@ -1,432 +1,132 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Krochlupic Up!</title>
-  <meta name="theme-color" content="#f4d35e">
-  <meta name="application-name" content="Krochlupic Up!">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="icon-192.png">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Krochlupic Up!">
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Krochlupic Up!</title>
+<meta name="theme-color" content="#f4d35e">
+<meta name="application-name" content="Krochlupic Up!">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Krochlupic Up!">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <button id="profile-side-btn" title="Профиль">🏅</button>
-
-  <div class="page page-active" id="page-1">
-
-    <div id="topbar">
-      <button class="tab-btn" data-tab="items">🛒 Магазин</button>
-      <button class="tab-btn" data-tab="achievements">🏆 Достижения</button>
-      <button class="tab-btn" data-tab="quests">📜 Задания</button>
-      <button class="tab-btn" data-tab="leaders">🥇 Лидеры</button>
-      <button class="tab-btn" data-tab="skins">🎨 Скины</button>
-      <button class="tab-btn" data-tab="stats">📊 Статистика</button>
-      <button class="tab-btn" data-tab="settings">⚙️ Настройки</button>
-      <button class="tab-btn" data-tab="help">❓ Помощь</button>
-      <button class="tab-btn hidden" data-tab="reward" id="tab-reward">🏅 Награда</button>
-      <button class="tab-btn hidden" data-tab="note" id="tab-note">📜 Записка</button>
-    </div>
-
-    <div id="event-banner" class="hidden"></div>
-    <div id="boost-banner" class="hidden"></div>
-
-    <h1 id="logo">💰 Krochlupic Up!</h1>
-
-    <div id="counter"><span id="coins">0</span> монет</div>
-    <div id="per-second">В секунду: <span id="cps">0</span></div>
-
-    <div id="hungry-info" style="display:none;">😭 Голодный смайлик: −5M монет/сек</div>
-    <div id="gulau-info" style="display:none;">🔥 #Gulau: ×5 тапов, осталось <span id="gulau-timer">15:00</span></div>
-    <div id="prestige-info">💎 Кристаллов: <span id="crystals">0</span> / 1000</div>
-    <div id="blood-info" style="display:none;">🌕 Кровавая луна! До конца: <span id="blood-timer">30:00</span></div>
-    <div id="shards-info">🌑 Кровавых осколков: <span id="shards">0</span> | ⚔️ Бонус: <span id="item-bonus">+0%</span></div>
-
-    <div id="tap-row">
-      <button id="deposit-side-btn" title="Вклад">❓</button>
-      <button id="click-btn">
-        <span id="tap-cooldown-text"></span>
-        <span id="tap-label">ТАП</span>
-      </button>
-    </div>
-
-    <button id="generator-btn">⚡ Генератор: Ур. 1</button>
-    <button id="chest-btn">🎁 Открыть сундук</button>
-
-    <div id="shop">
-      <h2>Магазин улучшений</h2>
-      <div id="shop-list"></div>
-    </div>
-
-  </div>
-
-  <div class="page" id="page-2">
-    <div id="coming-soon">
-      <div id="coming-noise"></div>
-      <h2 id="coming-title">СКОРО В ИГРЕ...</h2>
-      <p id="coming-subtitle">ОН ПРИБЛИЖАЕТСЯ</p>
-    </div>
-  </div>
-
-  <div id="page-nav">
-    <button id="page-prev" aria-label="Назад">◀</button>
-    <div id="page-dots">
-      <span class="page-dot active" data-page="1"></span>
-      <span class="page-dot" data-page="2"></span>
-    </div>
-    <button id="page-next" aria-label="Вперёд">▶</button>
-  </div>
-
-  <div id="chest-overlay" class="hidden">
-    <div id="chest-scene">
-      <div id="chest-emoji">🎁</div>
-      <div id="chest-shake">🎁</div>
-      <div id="chest-rewards"></div>
-      <button id="chest-collect" class="chest-collect-btn hidden">✅ Забрать</button>
-    </div>
-  </div>
-
-  <div id="offline-popup" class="hidden">
-    <div class="offline-box">
-      <h3>С возвращением!</h3>
-      <p>Пока вас не было, накопилось:</p>
-      <p class="offline-coins"><span id="offline-amount">0</span> монет</p>
-      <button id="offline-close">Забрать</button>
-    </div>
-  </div>
-
-  <div id="modal-profile" class="modal hidden">
-    <div class="modal-box">
-      <button class="modal-close" data-close="modal-profile">✕</button>
-      <h2>🏅 Профиль</h2>
-      <div class="modal-content">
-        <p style="text-align:center;color:#ddd;">Твой ник. Его <b>нельзя будет изменить</b>.<br>Он виден в лидерборде.</p>
-        <input type="text" id="profile-name-input" placeholder="Твой ник" maxlength="15" autocomplete="off" style="width:100%;padding:12px 15px;border-radius:8px;border:1px solid #3a7bd5;background:#0e1a30;color:white;font-size:16px;box-sizing:border-box;margin:15px 0;">
-        <button id="profile-save-btn" class="save-btn" type="button">✅ Сохранить ник</button>
-        <p id="profile-error" style="font-size:13px;color:#ff5252;margin-top:10px;min-height:18px;text-align:center;"></p>
-      </div>
-    </div>
-  </div>
-
-  <div id="tutorial-overlay" class="hidden">
-    <div id="tutorial-content">
-      <div id="tutorial-finger">👆</div>
-      <div id="tutorial-text"></div>
-      <button id="tutorial-next">Далее ▶</button>
-      <button id="tutorial-skip">Пропустить ✕</button>
-    </div>
-  </div>
-
-  <div id="modal-deposit" class="modal hidden">
-    <div class="modal-box">
-      <button class="modal-close" data-close="modal-deposit">✕</button>
-      <h2>🏦 Вклад</h2>
-      <div class="modal-content" id="deposit-content"></div>
-    </div>
-  </div>
-
-  <div id="modal-generator" class="modal hidden">
-    <div class="modal-box">
-      <button class="modal-close" data-close="modal-generator">✕</button>
-      <h2>⚡ Генератор кнопки</h2>
-      <div class="modal-content" id="generator-content"></div>
-    </div>
-  </div>
-
-  <div id="modal-items" class="modal hidden">
-    <div class="modal-box">
-      <button class="modal-close" data-close="modal-items">✕</button>
-      <h2>🛒 Магазин</h2>
-      <p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 15px;">
-        🌑 Осколков: <span id="items-shards">0</span> | 💎 Кристаллов: <span id="items-crystals">0</span>
-      </p>
-      <h3 style="color:#d0a0ff;margin:15px 0 10px;font-size:15px;">🌑 Предметы за осколки</h3>
-      <div id="items-list"></div>
-      <hr style="border-color:#3a7bd5;margin:25px 0;">
-      <h3 style="color:#4fc3f7;margin:15px 0 10px;font-size:15px;">💎 Товары за кристаллы</h3>
-      <div id="crystal-list"></div>
-    </div>
-  </div>
-
-  <div id="modal-achievements" class="modal hidden">
-    <div class="modal-box">
-      <button class="modal-close" data-close="modal-achievements">✕</button>
-      <h2>🏆 Достижения</h2>
-      <div id="achievements-list"></div>
-    </div>
-  </div>
-
-  <div id="modal-quests" class="modal hidden">
-    <div class="modal-box">
-      <button class="modal-close" data-close="modal-quests">✕</button>
-      <h2>📜 Задания дня</h2>
-      <p id="quests-timer" style="text-align:center;color:#aaa;font-size:13px;margin:0 0 15px;">⏰ Загрузка...</p>
-      <div id="quests-list"></div>
-    </div>
-  </div>
-
-  <div id="modal-leaders" class="modal hidden">
-    <div class="modal-box">
-      <button class="modal-close" data-close="modal-leaders">✕</button>
-      <h2>🥇 Лидеры</h2>
-
-      <div class="leaders-actions">
-        <p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 10px;">
-          Твой ник закреплён за профилем. Отправить рекорд?
-        </p>
-        <input type="text" id="leader-name" placeholder="Твой ник" maxlength="15" autocomplete="off" readonly>
-        <button id="leader-submit" class="save-btn" type="button">📤 Отправить рекорд</button>
-      </div>
-
-      <hr style="border-color:#3a7bd5;margin:20px 0;">
-
-      <div id="leaders-list">
-        <p class="leaders-loading">Загрузка...</p>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-skins" class="modal hidden">
-    <div class="modal-box">
-      <button class="modal-close" data-close="modal-skins">✕</button>
-      <h2>🎨 Скины</h2>
-      <h3 style="color:#f4d35e;margin:10px 0 8px;font-size:15px;">🖲️ Кнопка ТАП</h3>
-      <p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 10px;">Каждый скин — 5 💎</p>
-      <div id="skins-list" class="skins-grid"></div>
-      <hr style="border-color:#3a7bd5;margin:20px 0;">
-      <h3 style="color:#ff5252;margin:10px 0 8px;font-size:15px;">🎭 Смайлик вклада</h3>
-      <p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 10px;">Только через промокод</p>
-      <div id="smile-skins-list" class="skins-grid"></div>
-    </div>
-  </div>
-
-  <div id="modal-stats" class="modal hidden">
-    <div class="modal-box">
-      <button class="modal-close" data-close="modal-stats">✕</button>
-      <h2>📊 Статистика</h2>
-      <div class="modal-content">
-        <p>Монет сейчас: <b><span id="stat-coins">0</span></b></p>
-        <p>Всего заработано: <b><span id="stat-earned">0</span></b></p>
-        <p>Тапов сделано: <b><span id="stat-taps">0</span></b></p>
-        <p>Монет в секунду: <b><span id="stat-cps">0</span></b></p>
-        <p>За тап: <b><span id="stat-per-click">0</span></b></p>
-        <p>Кристаллов: <b><span id="stat-crystals">0</span></b></p>
-        <p>Осколков: <b><span id="stat-shards">0</span></b></p>
-        <p>Время в игре: <b><span id="stat-time">0</span></b></p>
-        <p>Достижений: <b><span id="stat-ach">0</span> / 53</b></p>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-settings" class="modal hidden">
-    <div class="modal-box">
-      <button class="modal-close" data-close="modal-settings">✕</button>
-      <h2>⚙️ Настройки</h2>
-      <div class="modal-content">
-        <label class="setting-row">
-          <span>Показывать +N при тапе</span>
-          <input type="checkbox" id="opt-float" checked>
-        </label>
-        <label class="setting-row">
-          <span>Показывать золотую монетку</span>
-          <input type="checkbox" id="opt-golden" checked>
-        </label>
-        <label class="setting-row">
-          <span>Ежедневный бонус</span>
-          <input type="checkbox" id="opt-daily" checked>
-        </label>
-        <label class="setting-row">
-          <span>Звуки</span>
-          <input type="checkbox" id="opt-sound" checked>
-        </label>
-        <label class="setting-row">
-          <span>Музыка</span>
-          <input type="checkbox" id="opt-music">
-        </label>
-        <hr style="border-color:#3a7bd5;margin:20px 0;">
-        <div class="promo-block">
-          <p style="color:#f4d35e;font-size:14px;margin:0 0 8px;">🎁 Подарочный код</p>
-          <input type="text" id="promo-input" placeholder="Введите код..." autocomplete="off">
-          <button id="promo-btn">Активировать</button>
-          <p id="promo-result" style="font-size:13px;margin:8px 0 0;min-height:18px;"></p>
-        </div>
-        <hr style="border-color:#3a7bd5;margin:20px 0;">
-        <div class="save-block">
-          <p style="color:#f4d35e;font-size:14px;margin:0 0 8px;">💾 Сохранение прогресса</p>
-          <button id="export-btn" class="save-btn" type="button">📤 Экспортировать прогресс</button>
-          <div id="export-box" class="save-box hidden">
-            <p class="save-hint">Скопируйте этот код и сохраните себе. Потом сможете восстановить прогресс.</p>
-            <textarea id="export-text" class="save-text" readonly></textarea>
-            <div class="save-row">
-              <button id="copy-btn" class="save-small-btn" type="button">📋 Скопировать</button>
-              <button id="export-close" class="save-small-btn" type="button">✖ Закрыть</button>
-            </div>
-          </div>
-          <button id="import-btn" class="save-btn" type="button">📥 Импортировать прогресс</button>
-          <div id="import-box" class="save-box hidden">
-            <p class="save-hint">Вставьте код, сохранённый ранее.</p>
-            <textarea id="import-text" class="save-text" placeholder="Вставьте сюда код..."></textarea>
-            <div class="save-row">
-              <button id="import-load" class="save-small-btn" type="button">📥 Загрузить</button>
-              <button id="import-cancel" class="save-small-btn" type="button">✖ Отмена</button>
-            </div>
-            <p id="import-result" class="save-result"></p>
-          </div>
-        </div>
-        <hr style="border-color:#3a7bd5;margin:20px 0;">
-        <button id="pahan-btn" class="advanced-btn hidden" type="button" style="background:linear-gradient(135deg,#7b1fa2,#e91e63);color:white;border:none;font-weight:bold;">🔥 Автокликер от Pahi</button>
-        <hr style="border-color:#3a7bd5;margin:20px 0;">
-        <button id="advanced-btn" class="advanced-btn" type="button">🔧 Дополнительные настройки</button>
-        <hr style="border-color:#3a7bd5;margin:20px 0;">
-
-        <!-- НОВЫЙ БЛОК: КОНТАКТЫ -->
-        <div class="contacts-block">
-          <p class="contacts-title">📞 Связь с разработчиком</p>
-
-          <a href="https://t.me/KrochlupicUp23" target="_blank" rel="noopener" class="contact-link telegram">
-            <span class="contact-icon">💬</span>
-            <span class="contact-text">
-              <span class="contact-label">Телеграм-канал</span>
-              <span class="contact-url">t.me/KrochlupicUp23</span>
-            </span>
-          </a>
-
-          <a href="https://vk.ru/krochlupic_up" target="_blank" rel="noopener" class="contact-link vk">
-            <span class="contact-icon">🌐</span>
-            <span class="contact-text">
-              <span class="contact-label">Канал ВКонтакте</span>
-              <span class="contact-url">vk.ru/krochlupic_up</span>
-            </span>
-          </a>
-
-          <a href="https://t.me/Sup_Krochlupic_Up" target="_blank" rel="noopener" class="contact-link support">
-            <span class="contact-icon">✍️</span>
-            <span class="contact-text">
-              <span class="contact-label">Связь с разработчиком</span>
-              <span class="contact-url">@Sup_Krochlupic_Up</span>
-            </span>
-          </a>
-        </div>
-
-        <hr style="border-color:#3a7bd5;margin:20px 0;">
-        <button id="settings-reset" class="danger-btn" type="button">Сбросить весь прогресс</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-secret" class="modal hidden">
-    <div class="modal-box">
-      <button class="modal-close" data-close="modal-secret">✕</button>
-      <h2>⚡ Кликер 67</h2>
-      <div class="modal-content">
-        <p style="text-align:center;font-size:48px;margin:10px 0;">🔥</p>
-        <p style="text-align:center;color:#ff5252;font-weight:bold;font-size:16px;">Секретный автокликер</p>
-        <p style="text-align:center;color:#ddd;">Делает <b>67 кликов в секунду</b> автоматически.</p>
-        <div id="secret-locked" style="margin-top:20px;">
-          <p style="text-align:center;color:#aaa;font-size:13px;">Для разблокировки нужно сделать <b style="color:#f4d35e;">6767 тапов</b></p>
-          <p style="text-align:center;color:#aaa;font-size:13px;">У вас: <b style="color:#4fc3f7;"><span id="secret-taps">0</span></b></p>
-          <div style="background:#0e1a30;border-radius:10px;height:20px;margin:15px 0;overflow:hidden;">
-            <div id="secret-progress" style="height:100%;width:0%;background:linear-gradient(90deg,#b71c1c,#ff5252);transition:width 0.3s;"></div>
-          </div>
-          <button id="secret-unlock" class="secret-btn" type="button">🔒 Разблокировать</button>
-        </div>
-        <div id="secret-unlocked" style="display:none;margin-top:20px;">
-          <p style="text-align:center;color:#4caf50;font-weight:bold;">✅ Автокликер разблокирован!</p>
-          <button id="secret-toggle" class="secret-btn secret-on" type="button">🔥 Активировать (67 Qa)</button>
-          <p id="secret-status" style="text-align:center;color:#aaa;font-size:13px;margin-top:10px;">Разблокирован. Активация: 67 Qa за 30 минут.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-boss" class="modal hidden">
-    <div class="modal-box">
-      <button class="modal-close" data-close="modal-boss">✕</button>
-      <h2>💀 БОСС-СМАЙЛИК</h2>
-      <div class="modal-content" style="text-align:center;">
-        <div id="boss-emoji" style="font-size:72px;margin:10px 0;cursor:pointer;user-select:none;transition:transform 0.05s;">😈</div>
-        <div id="boss-hp-bar" style="background:#0e1a30;border-radius:10px;height:24px;overflow:hidden;margin:15px 0;position:relative;">
-          <div id="boss-hp-fill" style="height:100%;width:100%;background:linear-gradient(90deg,#ff0000,#ff5252);transition:width 0.15s;"></div>
-          <div id="boss-hp-text" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px;color:white;">150 / 150</div>
-        </div>
-        <div id="boss-timer" style="font-size:18px;font-weight:bold;color:#f4d35e;margin:10px 0;">⏱ 45.0 с</div>
-        <p style="font-size:13px;color:#aaa;">Тапай по боссу! Успей за 45 секунд.</p>
-        <div id="boss-result" style="font-size:15px;font-weight:bold;margin-top:15px;min-height:20px;"></div>
-        <button id="boss-start" class="deposit-btn" type="button" style="margin-top:15px;">🔥 Начать бой</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-reward" class="modal hidden">
-    <div class="modal-box">
-      <button class="modal-close" data-close="modal-reward">✕</button>
-      <h2>🏅 Награда</h2>
-      <div class="modal-content" style="text-align:center;">
-        <p style="font-size:64px;margin:20px 0;">👆</p>
-        <p style="font-size:18px;color:#f4d35e;font-weight:bold;">Вы прокачали Кликер до 228 уровня!</p>
-        <p style="font-size:14px;color:#ddd;margin:15px 0;">За это полагается особая награда.</p>
-        <button id="reward-claim" class="deposit-btn" type="button" style="margin-top:20px;">🎁 Забрать награду</button>
-        <p id="reward-result" style="font-size:15px;font-weight:bold;margin-top:15px;min-height:20px;"></p>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-note" class="modal hidden">
-    <div class="modal-box note-box">
-      <button class="modal-close" data-close="modal-note">✕</button>
-      <h2>📜 Записки</h2>
-      <div id="note-list-view">
-        <p style="text-align:center;color:#d4c5a0;font-size:13px;margin-bottom:15px;">Найденные записки</p>
-        <div id="note-list"></div>
-      </div>
-      <div id="note-detail-view" style="display:none;">
-        <button id="note-back" class="save-small-btn" type="button" style="margin-bottom:15px;">← Назад к списку</button>
-        <div class="note-paper">
-          <p class="note-text" id="note-detail-text"></p>
-          <p class="note-sign" id="note-detail-sign"></p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="alarm-overlay" class="hidden">
-    <div id="alarm-sign">⚠️</div>
-    <p id="alarm-text">Ты давно не тапал!<br>Нажми на знак 5 раз</p>
-    <p id="alarm-counter">0 / 5</p>
-  </div>
-
-  <div id="modal-help" class="modal hidden">
-    <div class="modal-box">
-      <button class="modal-close" data-close="modal-help">✕</button>
-      <h2>❓ Как играть</h2>
-      <div class="modal-content">
-        <p><b>1.</b> Тапайте по большой кнопке — получаете монеты.</p>
-        <p><b>2.</b> Покупайте улучшения в магазине — они приносят монеты автоматически.</p>
-        <p><b>3.</b> Иногда появляется 🪙 золотая монетка — тапните, даст x7 доход на 30 секунд и шанс на 💎.</p>
-        <p><b>4.</b> Выполняйте достижения — за каждое даётся <b>+1 💎</b>.</p>
-        <p><b>5.</b> Сундук можно открывать <b>раз в час</b> — даёт кристаллы, монеты и осколки.</p>
-        <p><b>6.</b> Пока вас нет — фермы работают. При возвращении получите оффлайн-доход (до 8 часов).</p>
-        <p><b>7.</b> За <b>5 💎</b> во вкладке «Скины» можно купить новый вид кнопки ТАП.</p>
-        <p><b>8.</b> В магазине предметов за 🌑 осколки покупаются постоянные бонусы к доходу. Каждый предмет имеет <b>3 уровня</b>.</p>
-        <p><b>9.</b> Кнопка смайлика сверху-слева от ТАП — это <b>🏦 Вклад</b>. Каждые 30 минут уровень падает на 1–3.</p>
-        <p><b>10.</b> Кнопка <b>⚡ Генератор</b> под ТАП — прокачивает скорость кнопки ТАП.</p>
-        <p><b>11.</b> Вкладка <b>🥇 Лидеры</b> — общий рейтинг всех игроков по «Всего заработано».</p>
-        <p><b>12.</b> Вкладка <b>📜 Задания</b> — 3 ежедневных задания. Обновляются каждые сутки в 6:00.</p>
-        <p><b>13.</b> В настройках можно <b>экспортировать</b> и <b>импортировать</b> прогресс.</p>
-        <p><b>14.</b> Стрелки <b>◀ ▶</b> внизу — переключение между страницами игры.</p>
-        <p><b>15.</b> Максимум кристаллов — <b>1000</b>. Излишек автоматически превращается в монеты.</p>
-        <p><b>16.</b> Во вкладке <b>🛒 Магазин</b> есть вторая секция — товары за 💎 кристаллы (бусты, монеты, вклад).</p>
-        <p><b>17.</b> В игре есть <b>секретные действия</b> — попробуй их найти!</p>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-  <script src="game.js"></script>
+<button id="profile-side-btn" title="Профиль">🏅</button>
+<div class="page page-active" id="page-1">
+<canvas id="bg-canvas"></canvas>
+<div id="topbar">
+<button class="tab-btn" data-tab="items">🛒 Магазин</button>
+<button class="tab-btn" data-tab="boosters">📦 Бустеры</button>
+<button class="tab-btn" data-tab="achievements">🏆 Достижения</button>
+<button class="tab-btn" data-tab="quests">📜 Задания</button>
+<button class="tab-btn" data-tab="leaders">🥇 Лидеры</button>
+<button class="tab-btn" data-tab="skins">🎨 Скины</button>
+<button class="tab-btn" data-tab="stats">📊 Статистика</button>
+<button class="tab-btn" data-tab="settings">⚙️ Настройки</button>
+<button class="tab-btn" data-tab="help">❓ Помощь</button>
+<button class="tab-btn hidden" data-tab="reward" id="tab-reward">🏅 Награда</button>
+<button class="tab-btn hidden" data-tab="note" id="tab-note">📜 Записка</button>
+</div>
+<div id="event-banner" class="hidden"></div>
+<div id="boost-banner" class="hidden"></div>
+<h1 id="logo">💰 Krochlupic Up!</h1>
+<div id="counter"><span id="coins">0</span> монет</div>
+<div id="per-second">В секунду: <span id="cps">0</span></div>
+<div id="hungry-info" style="display:none">😭 Голодный смайлик: −5M монет/сек</div>
+<div id="gulau-info" style="display:none">🔥 #Gulau: ×5 тапов, осталось <span id="gulau-timer">15:00</span></div>
+<div id="prestige-info">💎 Кристаллов: <span id="crystals">0</span> / 1000</div>
+<div id="blood-info" style="display:none">🌕 Кровавая луна! До конца: <span id="blood-timer">30:00</span></div>
+<div id="shards-info">🌑 Кровавых осколков: <span id="shards">0</span> | ⚔️ Бонус: <span id="item-bonus">+0%</span></div>
+<div id="tap-row">
+<button id="deposit-side-btn" title="Вклад">❓</button>
+<button id="click-btn"><span id="tap-cooldown-text"></span><span id="tap-label">ТАП</span></button>
+</div>
+<button id="generator-btn">⚡ Генератор: Ур. 1</button>
+<div id="activity-row">
+<button id="chest-btn">🎁 Сундук</button>
+<button id="wheel-btn">🎡 Фортуна</button>
+</div>
+<button id="fortune-btn">🥠 Что сегодня?</button>
+<div id="shop"><h2>Магазин улучшений</h2><div id="items-tabs"><button class="items-tab active" data-itab="upgrades">Улучшения</button><button class="items-tab" data-itab="global">Гл. улучшения</button></div><div id="shop-list"></div><div id="global-shop-list"></div></div>
+</div>
+<div class="page" id="page-2">
+<div id="coming-soon">
+<div id="coming-noise"></div>
+<h2 id="coming-title">СКОРО В ИГРЕ...</h2>
+<p id="coming-subtitle">ОН ПРИБЛИЖАЕТСЯ</p>
+</div>
+</div>
+<div id="page-nav">
+<button id="page-prev" aria-label="Назад">◀</button>
+<div id="page-dots"><span class="page-dot active" data-page="1"></span><span class="page-dot" data-page="2"></span></div>
+<button id="page-next" aria-label="Вперёд">▶</button>
+</div>
+<div id="chest-overlay" class="hidden"><div id="chest-scene"><div id="chest-emoji">🎁</div><div id="chest-shake">🎁</div><div id="chest-rewards"></div><button id="chest-collect" class="chest-collect-btn hidden">✅ Забрать</button></div></div>
+<div id="wheel-overlay" class="hidden"><div id="wheel-scene"><h2 id="wheel-title">🎡 Колесо фортуны</h2><div id="wheel-container"><svg id="wheel-svg" viewBox="0 0 300 300"><g id="wheel-rotor"></g></svg><div id="wheel-pointer">▼</div><div id="wheel-center">🎡</div></div><div id="wheel-result"></div><div id="wheel-controls"><button id="wheel-spin-free" class="wheel-btn-free">🎁 Крутить бесплатно</button><button id="wheel-spin-paid" class="wheel-btn-paid">💰 Крутить</button></div><p id="wheel-timer" style="color:#aaa;font-size:13px;margin-top:15px"></p><button id="wheel-close" class="wheel-btn-close">✕ Закрыть</button></div></div>
+<div id="offline-popup" class="hidden"><div class="offline-box"><h3>С возвращением!</h3><p>Пока вас не было:</p><p class="offline-coins"><span id="offline-amount">0</span> монет</p><div id="offline-missed" class="offline-missed hidden"></div><button id="offline-close">Забрать</button></div></div>
+<div id="modal-profile" class="modal hidden"><div class="modal-box"><button class="modal-close" data-close="modal-profile">✕</button><h2>🏅 Профиль</h2><div class="modal-content"><p style="text-align:center;color:#ddd">Твой ник. Его <b>нельзя будет изменить</b>.<br>Он виден в лидерборде.</p><input type="text" id="profile-name-input" placeholder="Твой ник" maxlength="15" autocomplete="off" style="width:100%;padding:12px 15px;border-radius:8px;border:1px solid #3a7bd5;background:#0e1a30;color:white;font-size:16px;box-sizing:border-box;margin:15px 0"><button id="profile-save-btn" class="save-btn" type="button">✅ Сохранить ник</button><p id="profile-error" style="font-size:13px;color:#ff5252;margin-top:10px;min-height:18px;text-align:center"></p></div></div></div>
+<div id="tutorial-overlay" class="hidden"><div id="tutorial-content"><div id="tutorial-finger">👆</div><div id="tutorial-text"></div><button id="tutorial-next">Далее ▶</button><button id="tutorial-skip">Пропустить ✕</button></div></div>
+<div id="modal-deposit" class="modal hidden"><div class="modal-box"><button class="modal-close" data-close="modal-deposit">✕</button><h2>🏦 Вклад</h2><div class="modal-content" id="deposit-content"></div></div></div>
+<div id="modal-generator" class="modal hidden"><div class="modal-box"><button class="modal-close" data-close="modal-generator">✕</button><h2>⚡ Генератор кнопки</h2><div class="modal-content" id="generator-content"></div></div></div>
+<div id="modal-items" class="modal hidden"><div class="modal-box"><button class="modal-close" data-close="modal-items">✕</button><h2>🛒 Магазин</h2><p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 15px">🌑 Осколков: <span id="items-shards">0</span> | 💎 Кристаллов: <span id="items-crystals">0</span></p><h3 style="color:#d0a0ff;margin:15px 0 10px;font-size:15px">🌑 Предметы за осколки</h3><div id="items-list"></div><hr style="border-color:#3a7bd5;margin:25px 0"><h3 style="color:#4fc3f7;margin:15px 0 10px;font-size:15px">💎 Товары за кристаллы</h3><div id="crystal-list"></div></div></div>
+<div id="modal-boosters" class="modal hidden"><div class="modal-box"><button class="modal-close" data-close="modal-boosters">✕</button><h2>📦 Хранилище бустеров</h2><div id="booster-active-banner" class="booster-active-banner hidden"></div><p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 15px">Купленные бустеры попадают сюда. Активируй по одному.</p><div id="boosters-list" class="boosters-list"></div></div></div>
+<div id="modal-achievements" class="modal hidden"><div class="modal-box"><button class="modal-close" data-close="modal-achievements">✕</button><h2>🏆 Достижения</h2><div id="ach-filters"><button class="ach-filter active" data-tier="all">Все</button><button class="ach-filter" data-tier="bronze">🥉 Бронза</button><button class="ach-filter" data-tier="silver">🥈 Серебро</button><button class="ach-filter" data-tier="gold">🥇 Золото</button></div><div id="achievements-list"></div></div></div>
+<div id="modal-quests" class="modal hidden"><div class="modal-box"><button class="modal-close" data-close="modal-quests">✕</button><h2>📜 Задания дня</h2><p id="quests-timer" style="text-align:center;color:#aaa;font-size:13px;margin:0 0 15px">⏰ Загрузка...</p><div id="quests-list"></div></div></div>
+<div id="modal-leaders" class="modal hidden"><div class="modal-box"><button class="modal-close" data-close="modal-leaders">✕</button><h2>🥇 Лидеры</h2><div class="leaders-actions"><p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 10px">Твой ник закреплён за профилем. Отправить рекорд?</p><input type="text" id="leader-name" placeholder="Твой ник" maxlength="15" autocomplete="off" readonly><button id="leader-submit" class="save-btn" type="button">📤 Отправить рекорд</button></div><hr style="border-color:#3a7bd5;margin:20px 0"><div id="leaders-list"><p class="leaders-loading">Загрузка...</p></div></div></div>
+<div id="modal-skins" class="modal hidden"><div class="modal-box"><button class="modal-close" data-close="modal-skins">✕</button><h2>🎨 Скины</h2><h3 style="color:#f4d35e;margin:10px 0 8px;font-size:15px">🖲️ Кнопка ТАП</h3><p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 10px">Каждый скин — 5 💎</p><div id="skins-list" class="skins-grid"></div><hr style="border-color:#3a7bd5;margin:20px 0"><h3 style="color:#ff5252;margin:10px 0 8px;font-size:15px">❤️ Эмодзи-скины</h3><p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 10px">По 10 💎. Кнопка превращается в эмодзи</p><div id="emoji-skins-list" class="skins-grid"></div><hr style="border-color:#3a7bd5;margin:20px 0"><h3 style="color:#4fc3f7;margin:10px 0 8px;font-size:15px">🖼️ Фон игры</h3><p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 10px">По 25 💎. Тап — вкл/выкл</p><div id="bg-list" class="skins-grid"></div><hr style="border-color:#3a7bd5;margin:20px 0"><h3 style="color:#ff5252;margin:10px 0 8px;font-size:15px">🎭 Смайлик вклада</h3><p style="text-align:center;color:#aaa;font-size:13px;margin:0 0 10px">Только через промокод</p><div id="smile-skins-list" class="skins-grid"></div></div></div>
+<div id="modal-stats" class="modal hidden"><div class="modal-box"><button class="modal-close" data-close="modal-stats">✕</button><h2>📊 Статистика</h2><div class="modal-content"><p>Монет сейчас: <b><span id="stat-coins">0</span></b></p><p>Всего заработано: <b><span id="stat-earned">0</span></b></p><p>Тапов сделано: <b><span id="stat-taps">0</span></b></p><p>Монет в секунду: <b><span id="stat-cps">0</span></b></p><p>За тап: <b><span id="stat-per-click">0</span></b></p><p>Кристаллов: <b><span id="stat-crystals">0</span></b></p><p>Осколков: <b><span id="stat-shards">0</span></b></p><p>Время в игре: <b><span id="stat-time">0</span></b></p><p>Достижений: <b><span id="stat-ach">0</span> / <span id="stat-ach-total">0</span></b></p><p>🏆 Личный рекорд: <b><span id="stat-record">0</span></b></p></div></div></div>
+<div id="modal-settings" class="modal hidden"><div class="modal-box"><button class="modal-close" data-close="modal-settings">✕</button><h2>⚙️ Настройки</h2><div class="modal-content">
+<label class="setting-row"><span>Показывать +N при тапе</span><input type="checkbox" id="opt-float" checked></label>
+<label class="setting-row"><span>Показывать золотую монетку</span><input type="checkbox" id="opt-golden" checked></label>
+<label class="setting-row"><span>Ежедневный бонус</span><input type="checkbox" id="opt-daily" checked></label>
+<label class="setting-row"><span>Звуки</span><input type="checkbox" id="opt-sound" checked></label>
+<label class="setting-row"><span>Музыка</span><input type="checkbox" id="opt-music"></label>
+<hr style="border-color:#3a7bd5;margin:20px 0">
+<div class="promo-block"><p style="color:#f4d35e;font-size:14px;margin:0 0 8px">🎁 Подарочный код</p><input type="text" id="promo-input" placeholder="Введите код..." autocomplete="off"><button id="promo-btn">Активировать</button><p id="promo-result" style="font-size:13px;margin:8px 0 0;min-height:18px"></p></div>
+<hr style="border-color:#3a7bd5;margin:20px 0">
+<div class="save-block"><p style="color:#f4d35e;font-size:14px;margin:0 0 8px">💾 Сохранение прогресса</p><button id="export-btn" class="save-btn" type="button">📤 Экспортировать прогресс</button><div id="export-box" class="save-box hidden"><p class="save-hint">Скопируйте этот код и сохраните себе.</p><textarea id="export-text" class="save-text" readonly></textarea><div class="save-row"><button id="copy-btn" class="save-small-btn" type="button">📋 Скопировать</button><button id="export-close" class="save-small-btn" type="button">✖ Закрыть</button></div></div><button id="import-btn" class="save-btn" type="button">📥 Импортировать прогресс</button><div id="import-box" class="save-box hidden"><p class="save-hint">Вставьте код, сохранённый ранее.</p><textarea id="import-text" class="save-text" placeholder="Вставьте сюда код..."></textarea><div class="save-row"><button id="import-load" class="save-small-btn" type="button">📥 Загрузить</button><button id="import-cancel" class="save-small-btn" type="button">✖ Отмена</button></div><p id="import-result" class="save-result"></p></div></div>
+<hr style="border-color:#3a7bd5;margin:20px 0">
+<button id="pahan-btn" class="advanced-btn hidden" type="button" style="background:linear-gradient(135deg,#7b1fa2,#e91e63);color:white;border:none;font-weight:bold">🔥 Автокликер от Pahi</button>
+<hr style="border-color:#3a7bd5;margin:20px 0">
+<button id="advanced-btn" class="advanced-btn" type="button">🔧 Дополнительные настройки</button>
+<hr style="border-color:#3a7bd5;margin:20px 0">
+<div class="contacts-block"><p class="contacts-title">📞 Связь с разработчиком</p><a href="https://t.me/KrochlupicUp23" target="_blank" rel="noopener" class="contact-link telegram"><span class="contact-icon">💬</span><span class="contact-text"><span class="contact-label">Телеграм-канал</span><span class="contact-url">t.me/KrochlupicUp23</span></span></a><a href="https://vk.ru/krochlupic_up" target="_blank" rel="noopener" class="contact-link vk"><span class="contact-icon">🌐</span><span class="contact-text"><span class="contact-label">Канал ВКонтакте</span><span class="contact-url">vk.ru/krochlupic_up</span></span></a><a href="https://t.me/Sup_Krochlupic_Up" target="_blank" rel="noopener" class="contact-link support"><span class="contact-icon">✍️</span><span class="contact-text"><span class="contact-label">Связь с разработчиком</span><span class="contact-url">@Sup_Krochlupic_Up</span></span></a></div>
+<hr style="border-color:#3a7bd5;margin:20px 0">
+<button id="settings-reset" class="danger-btn" type="button">Сбросить весь прогресс</button>
+</div></div></div>
+<div id="modal-secret" class="modal hidden"><div class="modal-box"><button class="modal-close" data-close="modal-secret">✕</button><h2>⚡ Кликер 67</h2><div class="modal-content"><p style="text-align:center;font-size:48px;margin:10px 0">🔥</p><p style="text-align:center;color:#ff5252;font-weight:bold;font-size:16px">Секретный автокликер</p><p style="text-align:center;color:#ddd">Делает <b>67 кликов в секунду</b> автоматически.</p><div id="secret-locked" style="margin-top:20px"><p style="text-align:center;color:#aaa;font-size:13px">Для разблокировки нужно сделать <b style="color:#f4d35e">6767 тапов</b></p><p style="text-align:center;color:#aaa;font-size:13px">У вас: <b style="color:#4fc3f7"><span id="secret-taps">0</span></b></p><div style="background:#0e1a30;border-radius:10px;height:20px;margin:15px 0;overflow:hidden"><div id="secret-progress" style="height:100%;width:0%;background:linear-gradient(90deg,#b71c1c,#ff5252);transition:width .3s"></div></div><button id="secret-unlock" class="secret-btn" type="button">🔒 Разблокировать</button></div><div id="secret-unlocked" style="display:none;margin-top:20px"><p style="text-align:center;color:#4caf50;font-weight:bold">✅ Автокликер разблокирован!</p><button id="secret-toggle" class="secret-btn secret-on" type="button">🔥 Активировать (67 Qa)</button><p id="secret-status" style="text-align:center;color:#aaa;font-size:13px;margin-top:10px">Разблокирован. Активация: 67 Qa за 30 минут.</p></div></div></div></div>
+<div id="modal-boss" class="modal hidden"><div class="modal-box"><button class="modal-close" data-close="modal-boss">✕</button><h2>💀 БОСС-СМАЙЛИК</h2><div class="modal-content" style="text-align:center"><div id="boss-emoji" style="font-size:72px;margin:10px 0;cursor:pointer;user-select:none;transition:transform .05s">😈</div><div id="boss-hp-bar" style="background:#0e1a30;border-radius:10px;height:24px;overflow:hidden;margin:15px 0;position:relative"><div id="boss-hp-fill" style="height:100%;width:100%;background:linear-gradient(90deg,#ff0000,#ff5252);transition:width .15s"></div><div id="boss-hp-text" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px;color:white">150 / 150</div></div><div id="boss-timer" style="font-size:18px;font-weight:bold;color:#f4d35e;margin:10px 0">⏱ 45.0 с</div><p style="font-size:13px;color:#aaa">Тапай по боссу! Успей за 45 секунд.</p><div id="boss-result" style="font-size:15px;font-weight:bold;margin-top:15px;min-height:20px"></div><button id="boss-start" class="deposit-btn" type="button" style="margin-top:15px">🔥 Начать бой</button></div></div></div>
+<div id="modal-reward" class="modal hidden"><div class="modal-box"><button class="modal-close" data-close="modal-reward">✕</button><h2>🏅 Награда</h2><div class="modal-content" style="text-align:center"><p style="font-size:64px;margin:20px 0">👆</p><p style="font-size:18px;color:#f4d35e;font-weight:bold">Вы прокачали Кликер до 228 уровня!</p><p style="font-size:14px;color:#ddd;margin:15px 0">За это полагается особая награда.</p><button id="reward-claim" class="deposit-btn" type="button" style="margin-top:20px">🎁 Забрать награду</button><p id="reward-result" style="font-size:15px;font-weight:bold;margin-top:15px;min-height:20px"></p></div></div></div>
+<div id="modal-note" class="modal hidden"><div class="modal-box note-box"><button class="modal-close" data-close="modal-note">✕</button><h2>📜 Записки</h2><div id="note-list-view"><p style="text-align:center;color:#d4c5a0;font-size:13px;margin-bottom:15px">Найденные записки</p><div id="note-list"></div></div><div id="note-detail-view" style="display:none"><button id="note-back" class="save-small-btn" type="button" style="margin-bottom:15px">← Назад к списку</button><div class="note-paper"><p class="note-text" id="note-detail-text"></p><p class="note-sign" id="note-detail-sign"></p></div></div></div></div>
+<div id="alarm-overlay" class="hidden"><div id="alarm-sign">⚠️</div><p id="alarm-text">Ты давно не тапал!<br>Нажми на знак 5 раз</p><p id="alarm-counter">0 / 5</p></div>
+<div id="modal-help" class="modal hidden"><div class="modal-box"><button class="modal-close" data-close="modal-help">✕</button><h2>❓ Как играть</h2><div class="modal-content">
+<p><b>1.</b> Тапайте по большой кнопке — получаете монеты.</p>
+<p><b>2.</b> Покупайте улучшения в магазине.</p>
+<p><b>3.</b> Золотая монетка даёт x7 на 30 секунд.</p>
+<p><b>4.</b> За достижения даются 💎 (🥉=1, 🥈=3, 🥇=5).</p>
+<p><b>5.</b> Сундук раз в час — кристаллы, монеты, осколки, бустеры.</p>
+<p><b>6.</b> Оффлайн-доход до 8 часов.</p>
+<p><b>7.</b> Скины кнопки за 5 💎, эмодзи за 10 💎, фоны за 25 💎.</p>
+<p><b>8.</b> Предметы за 🌑 — 3 уровня.</p>
+<p><b>9.</b> Вклад — смайлик, каждые 30 минут падает уровень.</p>
+<p><b>10.</b> Генератор — прокачивает скорость тапов.</p>
+<p><b>11.</b> Лидерборд — рейтинг по «Всего заработано».</p>
+<p><b>12.</b> Задания обновляются в 6:00.</p>
+<p><b>13.</b> Экспорт/импорт в настройках.</p>
+<p><b>14.</b> Бустеры копятся в 📦 Хранилище.</p>
+<p><b>15.</b> Максимум кристаллов 1000.</p>
+<p><b>16.</b> 🥠 Печенька — раз в день предсказание.</p>
+<p><b>17.</b> 🎡 Колесо — 1 бесплатный спин в день (откат в 9:00).</p>
+<p><b>18.</b> 🌟 Супер кликер — в «Гл. улучшениях».</p>
+<p><b>19.</b> 🚨 Кража — 11:00 и 19:00, минус ~22% монет за 10 мин.</p>
+<p><b>20.</b> Максимум уровня улучшений — 699.</p>
+<p><b>21.</b> В игре есть секретные действия!</p>
+</div></div></div>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script src="game.js"></script>
 </body>
-          </html>
+  </html>
